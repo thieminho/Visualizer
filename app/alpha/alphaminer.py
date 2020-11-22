@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+from collections import defaultdict
 
 # TODO: Preprocessing logs to the form of case_id, act_name?
 
@@ -57,10 +57,23 @@ def create_footprint_matrix(dataframe):
             last_act_name = row['act_name']
     foot_matrix[foot_matrix == '0'] = '#'
     print(foot_matrix)
-    return foot_matrix
+    return all_events, foot_matrix
 
+
+def find_possible_sets(all_events, footprint_matrix):
+    possible_sets = []
+    possible_sets_dict = defaultdict(list)
+    for i in range(len(footprint_matrix)):
+        for j in range(len(footprint_matrix)):
+            if footprint_matrix[i, j] == '>':
+                possible_sets.append([all_events[i], all_events[j]])
+                possible_sets_dict[all_events[i]].append(all_events[j])
+    print(possible_sets)
+    print(possible_sets_dict)
+    return possible_sets
 
 
 df = read_csv_into_df('test_simple.csv')
 find_sets(df)
-create_footprint_matrix(df)
+events, matrix = create_footprint_matrix(df)
+find_possible_sets(events, matrix)
