@@ -36,22 +36,24 @@ def find_sets(dataframe):
 
 def create_footprint_matrix(dataframe):
     all_events = list(dataframe.act_name.unique())
+    all_events.sort()
     cases = dataframe.case_id.unique()
-    #all_events_dict = {v: k for v, k in enumerate(all_events)}
-    #print(all_events_dict)
-    foot_matrix = np.chararray((len(all_events), len(all_events)))
+    foot_matrix = np.full((len(all_events), len(all_events)), '0')
     foot_matrix[:] = '0'
-    print(foot_matrix)
-    print(cases)
     for case in cases:
         df = dataframe[dataframe.case_id.eq(case)]
         last_act_name = ''
         for index, row in df.iterrows():
             if last_act_name != '':
-                if foot_matrix[int(all_events.index(row['act_name'])) , int(all_events.index(last_act_name))] == '0':
-                    print('a')
-                elif foot_matrix[int(all_events.index(row['act_name'])) , int(all_events.index(last_act_name))] != '0':
-                    print('b')
+                if foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] == '0':
+                    foot_matrix[int(all_events.index(last_act_name)), int(all_events.index(row['act_name']))] = '>'
+                    foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] = '<'
+                elif foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] != '0':
+                    if foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] == '<':
+                        pass
+                    elif foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] == '>':
+                        foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] = '|'
+                        foot_matrix[int(all_events.index(last_act_name)), int(all_events.index(row['act_name']))] = '|'
             last_act_name = row['act_name']
     foot_matrix[foot_matrix == '0'] = '#'
     print(foot_matrix)
@@ -59,6 +61,6 @@ def create_footprint_matrix(dataframe):
 
 
 
-df = read_csv_into_df('test_log_june_1.csv')
+df = read_csv_into_df('test_simple.csv')
 find_sets(df)
 create_footprint_matrix(df)
