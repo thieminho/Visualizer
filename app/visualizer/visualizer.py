@@ -4,8 +4,18 @@ from PyQt5.QtWebEngineWidgets import *
 
 
 class Visualizer(QWebEngineView):
-    graph = None
 
     def __init__(self, graph):
         super().__init__()
         self.graph = graph
+        self.net = Network()
+
+    def set_graph_to_network(self):
+        self.net.from_nx(nx_graph=self.graph)
+
+    def show(self) -> None:
+        self.net.save_graph("visuzalized_graph.html")
+        self.setHtml(self.net.html)
+        super().show()
+
+
