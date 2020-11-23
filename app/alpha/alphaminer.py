@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from collections import defaultdict
 
 # TODO: Preprocessing logs to the form of case_id, act_name?
 
@@ -56,7 +55,7 @@ def create_visual_footprint_matrix(dataframe):
                         foot_matrix[int(all_events.index(last_act_name)), int(all_events.index(row['act_name']))] = '|'
             last_act_name = row['act_name']
     foot_matrix[foot_matrix == '0'] = '#'
-    print(foot_matrix)
+    #print(foot_matrix)
     return all_events, foot_matrix
 
 
@@ -106,11 +105,21 @@ def find_possible_sets(causals_set, non_related_set):
                 if x != y:
                     yl.discard(x)
                     break
-    print(yl)
+    #print(yl)
     return yl
 
 
+def insert_start_end(possible_sets, start, end):
+    model = []
+    model.append(start[0])
+    model.append(possible_sets)
+    model.append(end[0])
+    print(model)
+    return model
+
+
 df = read_csv_into_df('test_simple.csv')
-find_sets(df)
+all_events, start_events, end_events = find_sets(df)
 causality, parallel, non_related = create_footprint_matrix(df)
-find_possible_sets(causality, non_related)
+sets = find_possible_sets(causality, non_related)
+insert_start_end(sets, start_events, end_events)

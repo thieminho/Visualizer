@@ -1,8 +1,5 @@
-from typing import List, Any, Tuple
-
 import pandas as pd
-import numpy as np
-from collections import defaultdict
+
 
 # TODO: Preprocessing logs to the form of case_id, act_name?
 
@@ -58,7 +55,7 @@ def create_footprint_matrix(dataframe):
                     if (activity, second_activity) not in sequences and (second_activity, activity) not in sequences:
                         non_related.add((activity, second_activity))
     for sequence in sequences:
-        if (sequence[0], sequence[1]) in sequences and ( (sequence[1], sequence[0]) not in sequences or ((sequence[1], sequence[0], sequence[1]) in trios or (sequence[0], sequence[1], sequence[0]) in trios)):
+        if (sequence[0], sequence[1]) in sequences and ((sequence[1], sequence[0]) not in sequences or ((sequence[1], sequence[0], sequence[1]) in trios or (sequence[0], sequence[1], sequence[0]) in trios)):
             causality.add(sequence)
         if (sequence[0], sequence[1]) in sequences and (sequence[1], sequence[0]) in sequences and ((sequence[1], sequence[0], sequence[1]) not in trios and (sequence[0], sequence[1], sequence[0]) not in trios):
             if (sequence[0], sequence[1]) not in parallel and (sequence[1], sequence[0]) not in parallel:
@@ -66,7 +63,7 @@ def create_footprint_matrix(dataframe):
     #print(causality)
     #print(parallel)
     #print(non_related)
-    print(trios)
+    #print(trios)
     return causality, parallel, non_related
 
 
@@ -87,11 +84,21 @@ def find_possible_sets(causals_set, non_related_set):
                 if x != y:
                     yl.discard(x)
                     break
-    print(yl)
+    #print(yl)
     return yl
 
 
+def insert_start_end(possible_sets, start, end):
+    model = []
+    model.append(start[0])
+    model.append(possible_sets)
+    model.append(end[0])
+    print(model)
+    return model
+
+
 df = read_csv_into_df('test_trios.csv')
-find_sets(df)
+all_events, start_events, end_events = find_sets(df)
 causality, parallel, non_related = create_footprint_matrix(df)
-find_possible_sets(causality, non_related)
+sets = find_possible_sets(causality, non_related)
+insert_start_end(sets, start_events, end_events)
