@@ -34,7 +34,7 @@ def find_sets(dataframe):
     return all_events, start_events, end_events
 
 
-def create_footprint_matrix(dataframe):
+def create_visual_footprint_matrix(dataframe):
     all_events = list(dataframe.act_name.unique())
     all_events.sort()
     cases = dataframe.case_id.unique()
@@ -60,20 +60,57 @@ def create_footprint_matrix(dataframe):
     return all_events, foot_matrix
 
 
-def find_possible_sets(all_events, footprint_matrix):
-    possible_sets = []
-    possible_sets_dict = defaultdict(list)
-    for i in range(len(footprint_matrix)):
-        for j in range(len(footprint_matrix)):
-            if footprint_matrix[i, j] == '>':
-                possible_sets.append([all_events[i], all_events[j]])
-                possible_sets_dict[all_events[i]].append(all_events[j])
-    print(possible_sets)
-    print(possible_sets_dict)
-    return possible_sets
+def create_footprint_matrix(dataframe):
+    all_events = list(dataframe.act_name.unique())
+    cases = dataframe.case_id.unique()
+    causality = set()
+    parallel = set()
+    non_related = set()
+    sequences = []
+    for case in cases:
+        df = dataframe[dataframe.case_id.eq(case)]
+        task = list(df.act_name.unique())
+        for i in range(0, len(task) - 1):
+            sequences.append((task[i], task[i + 1]))
+        for activity in all_events:
+            for second_activity in task:
+                if (activity, second_activity) not in non_related and (second_activity, activity) not in non_related:
+                    if (activity, second_activity) not in sequences and (second_activity, activity) not in sequences:
+                        non_related.add((activity, second_activity))
+    for sequence in sequences:
+        if (sequence[0], sequence[1]) in sequences and (sequence[1], sequence[0]) not in sequences:
+            causality.add(sequence)
+        if (sequence[0], sequence[1]) in sequences and (sequence[1], sequence[0]) in sequences:
+            if (sequence[0], sequence[1]) not in parallel and (sequence[1], sequence[0]) not in parallel:
+                parallel.add(sequence)
+    print(causality)
+    print(parallel)
+    print(non_related)
+    return causality, parallel, non_related
 
+
+def find_possible_sets(causals_set, non_related_set):
+    xl = causals_set.copy()
+    for nr in non_related_set:
+        for causals in causals_set:
+            if (causals[0], nr[0]) in causals_set and (causals[0], nr[1]) in causals_set:
+                xl.add((causals[0], nr))
+            if (nr[0], causals[1]) in causals_set and (nr[1], causals[1]) in causals_set:
+                xl.add((nr, causals[1]))
+    yl = xl.copy()
+    print(xl)
+    for x in xl:
+        a = set(x[0])
+        b = set(x[1])
+        for y in xl:
+            if a.issubset(y[0]) and b.issubset(y[1]):
+                if x != y:
+                    yl.discard(x)
+                    break
+    print(yl)
+    return yl
 
 df = read_csv_into_df('test_simple.csv')
 find_sets(df)
-events, matrix = create_footprint_matrix(df)
-find_possible_sets(events, matrix)
+causality, parallel, non_related = create_footprint_matrix(df)
+find_possible_sets(causality, non_related)
