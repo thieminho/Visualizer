@@ -1,3 +1,5 @@
+from typing import List, Any, Tuple
+
 import pandas as pd
 import numpy as np
 from collections import defaultdict
@@ -34,32 +36,6 @@ def find_sets(dataframe):
     return all_events, start_events, end_events
 
 
-def create_visual_footprint_matrix(dataframe):
-    all_events = list(dataframe.act_name.unique())
-    all_events.sort()
-    cases = dataframe.case_id.unique()
-    foot_matrix = np.full((len(all_events), len(all_events)), '0')
-    foot_matrix[:] = '0'
-    for case in cases:
-        df = dataframe[dataframe.case_id.eq(case)]
-        last_act_name = ''
-        for index, row in df.iterrows():
-            if last_act_name != '':
-                if foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] == '0':
-                    foot_matrix[int(all_events.index(last_act_name)), int(all_events.index(row['act_name']))] = '>'
-                    foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] = '<'
-                elif foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] != '0':
-                    if foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] == '<':
-                        pass
-                    elif foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] == '>':
-                        foot_matrix[int(all_events.index(row['act_name'])), int(all_events.index(last_act_name))] = '|'
-                        foot_matrix[int(all_events.index(last_act_name)), int(all_events.index(row['act_name']))] = '|'
-            last_act_name = row['act_name']
-    foot_matrix[foot_matrix == '0'] = '#'
-    print(foot_matrix)
-    return all_events, foot_matrix
-
-
 def create_footprint_matrix(dataframe):
     all_events = list(dataframe.act_name.unique())
     cases = dataframe.case_id.unique()
@@ -67,9 +43,13 @@ def create_footprint_matrix(dataframe):
     parallel = set()
     non_related = set()
     sequences = []
+    trios = []
     for case in cases:
         df = dataframe[dataframe.case_id.eq(case)]
         task = list(df.act_name)
+        for i in range(0, len(task) - 2):
+            if task[i + 2] == task[i]:
+                trios.append((task[i], task[i + 1], task[i + 2]))
         for i in range(0, len(task) - 1):
             sequences.append((task[i], task[i + 1]))
         for activity in all_events:
@@ -78,14 +58,15 @@ def create_footprint_matrix(dataframe):
                     if (activity, second_activity) not in sequences and (second_activity, activity) not in sequences:
                         non_related.add((activity, second_activity))
     for sequence in sequences:
-        if (sequence[0], sequence[1]) in sequences and (sequence[1], sequence[0]) not in sequences:
+        if (sequence[0], sequence[1]) in sequences and ( (sequence[1], sequence[0]) not in sequences or ((sequence[1], sequence[0], sequence[1]) in trios or (sequence[0], sequence[1], sequence[0]) in trios)):
             causality.add(sequence)
-        if (sequence[0], sequence[1]) in sequences and (sequence[1], sequence[0]) in sequences:
+        if (sequence[0], sequence[1]) in sequences and (sequence[1], sequence[0]) in sequences and ((sequence[1], sequence[0], sequence[1]) not in trios and (sequence[0], sequence[1], sequence[0]) not in trios):
             if (sequence[0], sequence[1]) not in parallel and (sequence[1], sequence[0]) not in parallel:
                 parallel.add(sequence)
     #print(causality)
     #print(parallel)
     #print(non_related)
+    print(trios)
     return causality, parallel, non_related
 
 
@@ -110,7 +91,7 @@ def find_possible_sets(causals_set, non_related_set):
     return yl
 
 
-df = read_csv_into_df('test_simple.csv')
+df = read_csv_into_df('test_trios.csv')
 find_sets(df)
 causality, parallel, non_related = create_footprint_matrix(df)
 find_possible_sets(causality, non_related)
