@@ -7,6 +7,9 @@ import glob
 from pathlib import Path
 import importlib
 import importlib.util
+from app.visualizer.visualizer import  Visualizer
+from pyvis.network import Network
+import networkx as nx
 
 
 class App(QWidget):
@@ -25,7 +28,9 @@ class App(QWidget):
         self.top = 10
         self.width = 500
         self.height = 400
+        self.visualizer = Visualizer(None)
         self.init_ui()
+
 
     def init_ui(self):
         self.setWindowTitle(self.title)
@@ -73,6 +78,7 @@ class App(QWidget):
         self.label_file.adjustSize()
 
 
+
     def onChanged(self, text):
         self.qlabel.setText("Wybrany moduł: " + text)
         self.qlabel.adjustSize()
@@ -92,4 +98,14 @@ class App(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
+    data = pd.read_csv("https://www.macalester.edu/~abeverid/data/stormofswords.csv")
+    graph = nx.DiGraph()
+    G = nx.from_pandas_edgelist(data, source='Source', target='Target', edge_attr='Weight', create_using=graph)
+    got_net = Network(height="80%", width="100%", bgcolor="#222222", font_color="white")
+    got_net.from_nx(G)
+
+    got_net.save_graph("gameofthrones.html")
+    web = Visualizer(G)
+    web.setHtml(got_net.html)
+    web.show()
     sys.exit(app.exec_())
