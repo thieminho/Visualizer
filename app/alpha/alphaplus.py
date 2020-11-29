@@ -1,5 +1,6 @@
 import pandas as pd
-
+import os
+cur_dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # TODO: Preprocessing logs to the form of case_id, act_name?
 
@@ -55,9 +56,14 @@ def create_footprint_matrix(dataframe):
                     if (activity, second_activity) not in sequences and (second_activity, activity) not in sequences:
                         non_related.add((activity, second_activity))
     for sequence in sequences:
-        if (sequence[0], sequence[1]) in sequences and ((sequence[1], sequence[0]) not in sequences or ((sequence[1], sequence[0], sequence[1]) in trios or (sequence[0], sequence[1], sequence[0]) in trios)):
+        if (sequence[0], sequence[1]) in sequences and \
+                ((sequence[1], sequence[0]) not in sequences or
+                 ((sequence[1], sequence[0], sequence[1]) in trios or
+                  (sequence[0], sequence[1], sequence[0]) in trios)):
             causality.add(sequence)
-        if (sequence[0], sequence[1]) in sequences and (sequence[1], sequence[0]) in sequences and ((sequence[1], sequence[0], sequence[1]) not in trios and (sequence[0], sequence[1], sequence[0]) not in trios):
+        if (sequence[0], sequence[1]) in sequences and (sequence[1], sequence[0]) in sequences and \
+                ((sequence[1], sequence[0], sequence[1]) not in trios and
+                 (sequence[0], sequence[1], sequence[0]) not in trios):
             if (sequence[0], sequence[1]) not in parallel and (sequence[1], sequence[0]) not in parallel:
                 parallel.add(sequence)
     #print(causality)
@@ -84,21 +90,89 @@ def find_possible_sets(causals_set, non_related_set):
                 if x != y:
                     yl.discard(x)
                     break
-    #print(yl)
+    yl = list(yl)
     return yl
 
 
 def insert_start_end(possible_sets, start, end):
-    model = []
-    model.append(start[0])
-    model.append(possible_sets)
-    model.append(end[0])
-    print(model)
-    return model
+    possible_sets.insert(0, start[0])
+    possible_sets.append(end[0])
+    print(possible_sets)
+    return possible_sets
+
+
+def transitions(set):
+    transitions = []
+    for i in range(len(set)):
+        transitions.append([])
+    for i in range(len(set)):
+        if i == 0:
+            transitions[i].append('t')
+            transitions[i].append('t'+str(i))
+            transitions[i].append('')
+            transitions[i].append(set[i])
+        elif i == len(set) - 1:
+            transitions[i].append('t')
+            transitions[i].append('t' + str(i))
+            transitions[i].append(set[i])
+            transitions[i].append('')
+        else:
+            transitions[i].append('t')
+            transitions[i].append('t' + str(i))
+            temp = list(set[i])
+            for j in range(len(temp)):
+                string = ''
+                if isinstance(temp[j], tuple):
+                    list_of_strings = [str(s) for s in temp[j]]
+                    string = "".join(list_of_strings)
+                elif isinstance(temp[j], str):
+                    string = temp[j]
+                if j == 0:
+                    transitions[i].append(string)
+                elif j == 1:
+                    transitions[i].append(string)
+    print(transitions)
+    return transitions
+
+
+def activities(all_events):
+    activities = []
+    for i in range(len(all_events)):
+        activities.append([])
+        activities[i].append('a')
+        activities[i].append(all_events[i])
+    print(activities)
+    return activities
+
+
+def write_to_csv(transitions, activities, name, path):
+    dir_path = path
+    result = []
+    with open(os.path.join(dir_path, f"{name}.csv"), "w") as file:
+        file.write("%s\n" % 'type,id,from,to')
+        for activity in activities:
+            activity = str(activity)
+            activity = activity.replace('[', '')
+            activity = activity.replace(']', '')
+            activity = activity.replace('\'', '')
+            activity = activity.replace(' ', '')
+            file.write("%s\n" % activity)
+        for transition in transitions:
+            transition = str(transition)
+            transition = transition.replace('[', '')
+            transition = transition.replace(']', '')
+            transition = transition.replace('\'', '')
+            transition = transition.replace(' ', '')
+            #machine = machine.replace(',', '')
+            file.write("%s\n" % transition)
+    return
 
 
 df = read_csv_into_df('test_trios.csv')
 all_events, start_events, end_events = find_sets(df)
 causality, parallel, non_related = create_footprint_matrix(df)
 sets = find_possible_sets(causality, non_related)
-insert_start_end(sets, start_events, end_events)
+final_set = insert_start_end(sets, start_events, end_events)
+transitions = transitions(final_set)
+activities = activities(all_events)
+write_to_csv(transitions, activities, 'test', cur_dir_path)
