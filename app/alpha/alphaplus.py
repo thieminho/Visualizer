@@ -95,8 +95,16 @@ def find_possible_sets(causals_set, non_related_set):
 
 
 def insert_start_end(possible_sets, start, end):
-    possible_sets.insert(0, start[0])
-    possible_sets.append(end[0])
+    if (len(start)) > 1:
+        possible_sets.insert(0, ('START', tuple(start)))
+        possible_sets.insert(0, 'START')
+    else:
+        possible_sets.insert(0, start[0])
+    if (len(end)) > 1:
+        possible_sets.append((tuple(end), 'END'))
+        possible_sets.append('END')
+    else:
+        possible_sets.append(end[0])
     print(possible_sets)
     return possible_sets
 
@@ -124,7 +132,7 @@ def transitions(set):
                 string = ''
                 if isinstance(temp[j], tuple):
                     list_of_strings = [str(s) for s in temp[j]]
-                    string = "".join(list_of_strings)
+                    string = ";".join(list_of_strings)
                 elif isinstance(temp[j], str):
                     string = temp[j]
                 if j == 0:
@@ -163,7 +171,6 @@ def write_to_csv(transitions, activities, name, path):
             transition = transition.replace(']', '')
             transition = transition.replace('\'', '')
             transition = transition.replace(' ', '')
-            #machine = machine.replace(',', '')
             file.write("%s\n" % transition)
     return
 
@@ -176,3 +183,6 @@ final_set = insert_start_end(sets, start_events, end_events)
 transitions = transitions(final_set)
 activities = activities(all_events)
 write_to_csv(transitions, activities, 'test', cur_dir_path)
+
+
+#insert_start_end(sets, ['a', 'b'], ['e', 'd'])

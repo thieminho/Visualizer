@@ -3,12 +3,9 @@ import numpy as np
 import os
 cur_dir_path = os.path.dirname(os.path.realpath(__file__))
 
-# TODO: Preprocessing logs to the form of case_id, act_name?
-
 
 def read_csv_into_df(file_name):
     df = pd.read_csv(file_name)
-    print(df)
     return df
 
 
@@ -29,9 +26,6 @@ def find_sets(dataframe):
     end_set = set(end_events)
     start_events = list(start_set)
     end_events = list(end_set)
-    #print(all_events)
-    #print(start_events)
-    #print(end_events)
     return all_events, start_events, end_events
 
 
@@ -57,7 +51,6 @@ def create_visual_footprint_matrix(dataframe):
                         foot_matrix[int(all_events.index(last_act_name)), int(all_events.index(row['act_name']))] = '|'
             last_act_name = row['act_name']
     foot_matrix[foot_matrix == '0'] = '#'
-    #print(foot_matrix)
     return all_events, foot_matrix
 
 
@@ -84,9 +77,6 @@ def create_footprint_matrix(dataframe):
         if (sequence[0], sequence[1]) in sequences and (sequence[1], sequence[0]) in sequences:
             if (sequence[0], sequence[1]) not in parallel and (sequence[1], sequence[0]) not in parallel:
                 parallel.add(sequence)
-    #print(causality)
-    #print(parallel)
-    #print(non_related)
     return causality, parallel, non_related
 
 
@@ -112,10 +102,18 @@ def find_possible_sets(causals_set, non_related_set):
 
 
 def insert_start_end(possible_sets, start, end):
-    possible_sets.insert(0, start[0])
-    possible_sets.append(end[0])
-    print(possible_sets)
+    if (len(start)) > 1:
+        possible_sets.insert(0, ('START', tuple(start)))
+        possible_sets.insert(0, 'START')
+    else:
+        possible_sets.insert(0, start[0])
+    if (len(end)) > 1:
+        possible_sets.append((tuple(end), 'END'))
+        possible_sets.append('END')
+    else:
+        possible_sets.append(end[0])
     return possible_sets
+
 
 def transitions(set):
     transitions = []
@@ -140,14 +138,13 @@ def transitions(set):
                 string = ''
                 if isinstance(temp[j], tuple):
                     list_of_strings = [str(s) for s in temp[j]]
-                    string = "".join(list_of_strings)
+                    string = ";".join(list_of_strings)
                 elif isinstance(temp[j], str):
                     string = temp[j]
                 if j == 0:
                     transitions[i].append(string)
                 elif j == 1:
                     transitions[i].append(string)
-    print(transitions)
     return transitions
 
 
@@ -157,7 +154,6 @@ def activities(all_events):
         activities.append([])
         activities[i].append('a')
         activities[i].append(all_events[i])
-    print(activities)
     return activities
 
 
@@ -179,7 +175,6 @@ def write_to_csv(transitions, activities, name, path):
             transition = transition.replace(']', '')
             transition = transition.replace('\'', '')
             transition = transition.replace(' ', '')
-            #machine = machine.replace(',', '')
             file.write("%s\n" % transition)
     return
 
@@ -191,4 +186,4 @@ sets = find_possible_sets(causality, non_related)
 final_set = insert_start_end(sets, start_events, end_events)
 transitions = transitions(final_set)
 activities = activities(all_events)
-write_to_csv(transitions, activities, 'test', cur_dir_path)
+write_to_csv(transitions, activities, 'transition_result', cur_dir_path)

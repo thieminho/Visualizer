@@ -1,9 +1,12 @@
 type,id,from,to
 a,a
 a,b
-a,d
 a,c
+a,d
+a,e
 t,t0,,a
-t,t1,ca,b
-t,t2,b,cd
-t,t3,d,
+t,t1,a,e;c
+t,t2,e;c,d
+t,t3,e;b,d
+t,t4,a,e;b
+t,t5,d,
