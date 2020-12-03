@@ -116,13 +116,4 @@ class App(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
-    # data = pd.read_csv("https://www.macalester.edu/~abeverid/data/stormofswords.csv")
-    # graph = nx.DiGraph()
-    # G = nx.from_pandas_edgelist(data, source='Source', target='Target', edge_attr='Weight', create_using=graph)
-    # got_net = Network(height="80%", width="100%", bgcolor="#222222", font_color="white")
-    # got_net.from_nx(G)
-    # got_net.save_graph("gameofthrones.html")
-    # web = Visualizer(G)
-    # web.set_graph_to_network()
-    # web.show()
     sys.exit(app.exec_())
