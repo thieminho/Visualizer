@@ -27,7 +27,7 @@ Nazewnictwo kolumn:
 4. to - lista następników wierzchołka, rodzielona średnikami
 5. significance - współczynnik ważności
 
-1. Pliki tranzition_result.csv:
+1. Pliki transition_result.csv:
     - pliki wynikowe dla algorytmów generujących grafy z tranzycjami, takie jak np. algorytmy rodziny Alpha.
     - 4 kolumny - type, id, from, to
     
