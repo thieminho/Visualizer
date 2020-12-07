@@ -13,19 +13,15 @@ def find_sets(dataframe):
     all_events = dataframe.act_name.unique()
     start_events = []
     end_events = []
-    old_case_id = ''
-    old_act_name = ''
-    for index, row in df.iterrows():
-        if row['case_id'] != old_case_id:
-            start_events.append(row['act_name'])
-            if old_case_id != '':
-                end_events.append(old_act_name)
-        old_case_id = row['case_id']
-        old_act_name = row['act_name']
-    start_set = set(start_events)
-    end_set = set(end_events)
-    start_events = list(start_set)
-    end_events = list(end_set)
+    cases = dataframe.case_id.unique()
+    for case in cases:
+        tasks = []
+        df = dataframe[dataframe.case_id.eq(case)]
+        task = list(df.act_name)
+        if task[0] not in start_events:
+            start_events.append(task[0])
+        if task[int(len(task)-1)] not in end_events:
+            end_events.append(task[int(len(task)-1)])
     return all_events, start_events, end_events
 
 
@@ -80,19 +76,86 @@ def create_footprint_matrix(dataframe):
     return causality, parallel, non_related
 
 
+def find_more_sets(sets, non_related):
+    fin = []
+    sets = list(sets)
+    for i in range(len(sets)):
+        trans_after = []
+        trans_before = []
+        for j in range(len(sets)):
+            if sets[i] == sets[j]:
+                continue
+            elif sets[i][0] == sets[j][0]:
+                if (sets[i][1], sets[j][1]) in non_related:
+                    if sets[i][1] not in trans_after:
+                        trans_after.append(sets[i][1])
+                    if sets[j][1] not in trans_after:
+                        trans_after.append(sets[j][1])
+
+                    fin.append((sets[i][0], tuple(trans_after)))
+            elif sets[i][1] == sets[j][1]:
+                if (sets[i][0], sets[j][0]) in non_related:
+                    if sets[i][0] not in trans_before:
+                        trans_before.append(sets[i][0])
+                    if sets[j][0] not in trans_before:
+                        trans_before.append(sets[j][0])
+                    fin.append((tuple(trans_before), sets[i][1]))
+        if trans_before == [] or trans_after == []:
+            continue
+    return fin
+
+
 def find_possible_sets(causals_set, non_related_set):
+    print(non_related)
+    non_related_set_copy = non_related_set.copy()
+    for nr in non_related_set_copy:
+        if nr[0] == nr[1]:
+            non_related_set.remove(nr)
+        else:
+            continue
     xl = causals_set.copy()
     for nr in non_related_set:
         for causals in causals_set:
+            print(causals)
+            print(nr)
             if (causals[0], nr[0]) in causals_set and (causals[0], nr[1]) in causals_set:
-                xl.add((causals[0], nr))
+                xl.add((causals[0], (nr)))
             if (nr[0], causals[1]) in causals_set and (nr[1], causals[1]) in causals_set:
-                xl.add((nr, causals[1]))
+                xl.add(((nr), causals[1]))
+
     yl = xl.copy()
+    print(xl)
     for x in xl:
         a = set(x[0])
         b = set(x[1])
         for y in xl:
+            if a.issubset(y[0]) and b.issubset(y[1]):
+                if x != y:
+                    yl.discard(x)
+                    break
+    to = yl.copy()
+    for t in to:
+        for x in xl:
+            if t == x[0]:
+                yl.discard(t)
+
+    ql = list(yl)
+    fin = find_more_sets(yl, non_related)
+    while True:
+        last = fin
+        fin = find_more_sets(fin, non_related)
+        if fin == []:
+            break
+    fin = last
+    for set1 in ql:
+        fin.append(set1)
+    fin = set(fin)
+    yl = fin.copy()
+    print(xl)
+    for x in fin:
+        a = set(x[0])
+        b = set(x[1])
+        for y in fin:
             if a.issubset(y[0]) and b.issubset(y[1]):
                 if x != y:
                     yl.discard(x)
@@ -158,8 +221,8 @@ def activities(all_events):
 
 
 def write_to_csv(transitions, activities, name, path):
+    print(transitions)
     dir_path = path
-    result = []
     with open(os.path.join(dir_path, f"{name}.csv"), "w") as file:
         file.write("%s\n" % 'type,id,from,to')
         for activity in activities:
@@ -179,10 +242,10 @@ def write_to_csv(transitions, activities, name, path):
     return
 
 
-df = read_csv_into_df('test_simple.csv')
+df = read_csv_into_df('example5.csv')
 all_events, start_events, end_events = find_sets(df)
 causality, parallel, non_related = create_footprint_matrix(df)
-sets = find_possible_sets(causality, non_related)
+sets = find_possible_sets(causality, parallel)
 final_set = insert_start_end(sets, start_events, end_events)
 transitions = transitions(final_set)
 activities = activities(all_events)

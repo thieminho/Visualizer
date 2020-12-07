@@ -15,23 +15,58 @@ def find_sets(dataframe):
     all_events = dataframe.act_name.unique()
     start_events = []
     end_events = []
-    old_case_id = ''
-    old_act_name = ''
-    for index, row in df.iterrows():
-        if row['case_id'] != old_case_id:
-            start_events.append(row['act_name'])
-            if old_case_id != '':
-                end_events.append(old_act_name)
-        old_case_id = row['case_id']
-        old_act_name = row['act_name']
-    start_set = set(start_events)
-    end_set = set(end_events)
-    start_events = list(start_set)
-    end_events = list(end_set)
-    #print(all_events)
-    #print(start_events)
-    #print(end_events)
+    cases = dataframe.case_id.unique()
+    for case in cases:
+        tasks = []
+        df = dataframe[dataframe.case_id.eq(case)]
+        task = list(df.act_name)
+        if task[0] not in start_events:
+            start_events.append(task[0])
+        if task[int(len(task)-1)] not in end_events:
+            end_events.append(task[int(len(task)-1)])
     return all_events, start_events, end_events
+
+
+def preprocess_for_one_loops(dataframe):
+    #[from, to, node]
+    cases = dataframe.case_id.unique()
+    one_loops = []
+    a = 0
+    for case in cases:
+        df = dataframe[dataframe.case_id.eq(case)]
+        task = list(df.act_name)
+        start = True
+        for i in range(len(task) - 1):
+            a += 1
+            if task[i] == task[i+1] and start:
+                from_act = task[i-1]
+                item = task[i]
+                start = False
+                continue
+            elif task[i] == task[i+1]:
+                continue
+            elif task[i] != task[i+1] and not start:
+                to_act = task[i+1]
+                a += 1
+                if [from_act, to_act, item] not in one_loops:
+                    one_loop = [from_act, to_act, item]
+                    one_loops.append(one_loop)
+                start = True
+                dataframe.drop(dataframe[dataframe['act_name'] == item].index, inplace=True)
+    return dataframe, one_loops
+
+
+def insert_one_loops_finally(transitions, one_loops):
+    if len(one_loops) > 0:
+        for loop in one_loops:
+            for transition in transitions:
+                if loop[0] in list(transition[2]) and loop[1] in list(transition[3]):
+                    transition[2] += f';{loop[2]}'
+                    transition[3] += f';{loop[2]}'
+                    break
+                else:
+                    continue
+    return transitions
 
 
 def create_footprint_matrix(dataframe):
@@ -66,26 +101,89 @@ def create_footprint_matrix(dataframe):
                  (sequence[0], sequence[1], sequence[0]) not in trios):
             if (sequence[0], sequence[1]) not in parallel and (sequence[1], sequence[0]) not in parallel:
                 parallel.add(sequence)
-    #print(causality)
-    #print(parallel)
-    #print(non_related)
-    #print(trios)
     return causality, parallel, non_related
 
 
+def find_more_sets(sets, non_related):
+    fin = []
+    sets = list(sets)
+    for i in range(len(sets)):
+        trans_after = []
+        trans_before = []
+        for j in range(len(sets)):
+            if sets[i] == sets[j]:
+                continue
+            elif sets[i][0] == sets[j][0]:
+                if (sets[i][1], sets[j][1]) in non_related:
+                    if sets[i][1] not in trans_after:
+                        trans_after.append(sets[i][1])
+                    if sets[j][1] not in trans_after:
+                        trans_after.append(sets[j][1])
+
+                    fin.append((sets[i][0], tuple(trans_after)))
+            elif sets[i][1] == sets[j][1]:
+                if (sets[i][0], sets[j][0]) in non_related:
+                    if sets[i][0] not in trans_before:
+                        trans_before.append(sets[i][0])
+                    if sets[j][0] not in trans_before:
+                        trans_before.append(sets[j][0])
+                    fin.append((tuple(trans_before), sets[i][1]))
+        if trans_before == [] or trans_after == []:
+            continue
+    return fin
+
+
 def find_possible_sets(causals_set, non_related_set):
+    print(non_related)
+    non_related_set_copy = non_related_set.copy()
+    for nr in non_related_set_copy:
+        if nr[0] == nr[1]:
+            non_related_set.remove(nr)
+        else:
+            continue
     xl = causals_set.copy()
     for nr in non_related_set:
         for causals in causals_set:
+            print(causals)
+            print(nr)
             if (causals[0], nr[0]) in causals_set and (causals[0], nr[1]) in causals_set:
-                xl.add((causals[0], nr))
+                xl.add((causals[0], (nr)))
             if (nr[0], causals[1]) in causals_set and (nr[1], causals[1]) in causals_set:
-                xl.add((nr, causals[1]))
+                xl.add(((nr), causals[1]))
+
     yl = xl.copy()
+    print(xl)
     for x in xl:
         a = set(x[0])
         b = set(x[1])
         for y in xl:
+            if a.issubset(y[0]) and b.issubset(y[1]):
+                if x != y:
+                    yl.discard(x)
+                    break
+    to = yl.copy()
+    for t in to:
+        for x in xl:
+            if t == x[0]:
+                yl.discard(t)
+
+    ql = list(yl)
+    fin = find_more_sets(yl, non_related)
+    while True:
+        last = fin
+        fin = find_more_sets(fin, non_related)
+        if fin == []:
+            break
+    fin = last
+    for set1 in ql:
+        fin.append(set1)
+    fin = set(fin)
+    yl = fin.copy()
+    print(xl)
+    for x in fin:
+        a = set(x[0])
+        b = set(x[1])
+        for y in fin:
             if a.issubset(y[0]) and b.issubset(y[1]):
                 if x != y:
                     yl.discard(x)
@@ -105,7 +203,6 @@ def insert_start_end(possible_sets, start, end):
         possible_sets.append('END')
     else:
         possible_sets.append(end[0])
-    print(possible_sets)
     return possible_sets
 
 
@@ -139,7 +236,6 @@ def transitions(set):
                     transitions[i].append(string)
                 elif j == 1:
                     transitions[i].append(string)
-    print(transitions)
     return transitions
 
 
@@ -149,7 +245,6 @@ def activities(all_events):
         activities.append([])
         activities[i].append('a')
         activities[i].append(all_events[i])
-    print(activities)
     return activities
 
 
@@ -175,14 +270,21 @@ def write_to_csv(transitions, activities, name, path):
     return
 
 
-df = read_csv_into_df('test_trios.csv')
+df = read_csv_into_df('example4.csv')
 all_events, start_events, end_events = find_sets(df)
+#preprocessing
+df, one_loops = preprocess_for_one_loops(df)
+
 causality, parallel, non_related = create_footprint_matrix(df)
-sets = find_possible_sets(causality, non_related)
+sets = find_possible_sets(causality, parallel)
 final_set = insert_start_end(sets, start_events, end_events)
 transitions = transitions(final_set)
+print("BEFORE ONE LOOPS: ", transitions)
+transitions = insert_one_loops_finally(transitions, one_loops)
+print("AFTER ONE LOOPS: ", transitions)
 activities = activities(all_events)
 write_to_csv(transitions, activities, 'test', cur_dir_path)
 
 
 #insert_start_end(sets, ['a', 'b'], ['e', 'd'])
+#example1 - easy with one one-loop
