@@ -1,0 +1,10 @@
+type,id,from,to
+a,a
+a,d
+a,c
+a,b
+t,t0,,START
+t,t1,START,a;b
+t,t2,b;a,c;d
+t,t3,d;c,END
+t,t4,END,
