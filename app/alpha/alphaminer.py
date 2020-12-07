@@ -106,7 +106,7 @@ def find_more_sets(sets, non_related):
 
 
 def find_possible_sets(causals_set, non_related_set):
-    print(non_related)
+    #print(non_related)
     non_related_set_copy = non_related_set.copy()
     for nr in non_related_set_copy:
         if nr[0] == nr[1]:
@@ -116,15 +116,15 @@ def find_possible_sets(causals_set, non_related_set):
     xl = causals_set.copy()
     for nr in non_related_set:
         for causals in causals_set:
-            print(causals)
-            print(nr)
+            #print(causals)
+            #print(nr)
             if (causals[0], nr[0]) in causals_set and (causals[0], nr[1]) in causals_set:
                 xl.add((causals[0], (nr)))
             if (nr[0], causals[1]) in causals_set and (nr[1], causals[1]) in causals_set:
                 xl.add(((nr), causals[1]))
 
     yl = xl.copy()
-    print(xl)
+    #print(xl)
     for x in xl:
         a = set(x[0])
         b = set(x[1])
@@ -144,14 +144,14 @@ def find_possible_sets(causals_set, non_related_set):
     while True:
         last = fin
         fin = find_more_sets(fin, non_related)
-        if fin == []:
+        if not fin:
             break
     fin = last
     for set1 in ql:
         fin.append(set1)
     fin = set(fin)
     yl = fin.copy()
-    print(xl)
+    #print(xl)
     for x in fin:
         a = set(x[0])
         b = set(x[1])
@@ -221,7 +221,7 @@ def activities(all_events):
 
 
 def write_to_csv(transitions, activities, name, path):
-    print(transitions)
+    #print(transitions)
     dir_path = path
     with open(os.path.join(dir_path, f"{name}.csv"), "w") as file:
         file.write("%s\n" % 'type,id,from,to')
@@ -242,7 +242,7 @@ def write_to_csv(transitions, activities, name, path):
     return
 
 
-df = read_csv_into_df('example5.csv')
+df = read_csv_into_df('tests/ex5-ap/example5.csv')
 all_events, start_events, end_events = find_sets(df)
 causality, parallel, non_related = create_footprint_matrix(df)
 sets = find_possible_sets(causality, parallel)

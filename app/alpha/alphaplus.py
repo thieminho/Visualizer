@@ -7,7 +7,7 @@ cur_dir_path = os.path.dirname(os.path.realpath(__file__))
 
 def read_csv_into_df(file_name):
     df = pd.read_csv(file_name)
-    print(df)
+    #print(df)
     return df
 
 
@@ -134,7 +134,7 @@ def find_more_sets(sets, non_related):
 
 
 def find_possible_sets(causals_set, non_related_set):
-    print(non_related)
+    #print(non_related)
     non_related_set_copy = non_related_set.copy()
     for nr in non_related_set_copy:
         if nr[0] == nr[1]:
@@ -144,15 +144,15 @@ def find_possible_sets(causals_set, non_related_set):
     xl = causals_set.copy()
     for nr in non_related_set:
         for causals in causals_set:
-            print(causals)
-            print(nr)
+            #print(causals)
+            #print(nr)
             if (causals[0], nr[0]) in causals_set and (causals[0], nr[1]) in causals_set:
                 xl.add((causals[0], (nr)))
             if (nr[0], causals[1]) in causals_set and (nr[1], causals[1]) in causals_set:
                 xl.add(((nr), causals[1]))
 
     yl = xl.copy()
-    print(xl)
+    #print(xl)
     for x in xl:
         a = set(x[0])
         b = set(x[1])
@@ -179,7 +179,7 @@ def find_possible_sets(causals_set, non_related_set):
         fin.append(set1)
     fin = set(fin)
     yl = fin.copy()
-    print(xl)
+    #print(xl)
     for x in fin:
         a = set(x[0])
         b = set(x[1])
@@ -270,7 +270,7 @@ def write_to_csv(transitions, activities, name, path):
     return
 
 
-df = read_csv_into_df('example4.csv')
+df = read_csv_into_df('tests/ex5-ap/example5.csv')
 all_events, start_events, end_events = find_sets(df)
 #preprocessing
 df, one_loops = preprocess_for_one_loops(df)
@@ -279,11 +279,11 @@ causality, parallel, non_related = create_footprint_matrix(df)
 sets = find_possible_sets(causality, parallel)
 final_set = insert_start_end(sets, start_events, end_events)
 transitions = transitions(final_set)
-print("BEFORE ONE LOOPS: ", transitions)
+#print("BEFORE ONE LOOPS: ", transitions)
 transitions = insert_one_loops_finally(transitions, one_loops)
-print("AFTER ONE LOOPS: ", transitions)
+#print("AFTER ONE LOOPS: ", transitions)
 activities = activities(all_events)
-write_to_csv(transitions, activities, 'test', cur_dir_path)
+write_to_csv(transitions, activities, 'transition_result', cur_dir_path)
 
 
 #insert_start_end(sets, ['a', 'b'], ['e', 'd'])
