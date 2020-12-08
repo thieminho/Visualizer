@@ -1,9 +1,9 @@
 type,id,from,to
-a,a
-a,b
-a,c
-a,d
+n,a
+n,b
+n,c
+n,d
 t,t0,,a
-t,t1,c,d
-t,t2,a;b,c;b
+t,t1,a;b,c;b
+t,t2,c,d
 t,t3,d,
