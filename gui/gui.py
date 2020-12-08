@@ -61,8 +61,8 @@ class App(QWidget):
         self.load_graph.clicked.connect(self.on_load_clicked)
         # TEMPORARY TO CHECK LAYOUT OPTIONS
         # data = pd.read_csv("https://www.macalester.edu/~abeverid/data/stormofswords.csv")
-        data = pd.read_csv("../test.csv")
-        self.visualizer = Visualizer(data)
+        file_name = '../app/alpha/tests/ex6/transition_result.csv'
+        self.visualizer = Visualizer(file_name=file_name)
         self.visualizer.set_graph_to_network()
         grid.addWidget(self.visualizer, 0, 1, 4, 1)
         grid.setColumnStretch(0, 1)

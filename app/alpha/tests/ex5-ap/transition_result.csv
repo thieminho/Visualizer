@@ -1,8 +1,10 @@
 type,id,from,to
-a,a
-a,d
-a,c
-a,b
+n,a
+n,d
+n,c
+n,b
+n,START
+n,END
 t,t0,,START
 t,t1,START,a;b
 t,t2,b;a,c;d

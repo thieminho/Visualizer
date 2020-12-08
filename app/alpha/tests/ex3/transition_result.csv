@@ -1,7 +1,7 @@
 type,id,from,to
-a,a
-a,b
-a,c
+n,a
+n,b
+n,c
 t,t0,,a
 t,t1,b,c
 t,t2,a,b
