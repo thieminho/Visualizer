@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 cur_dir_path = os.path.dirname(os.path.realpath(__file__))
+from itertools import product
 
 
 def read_csv_into_df(file_name):
@@ -48,6 +49,47 @@ def create_visual_footprint_matrix(dataframe):
             last_act_name = row['act_name']
     foot_matrix[foot_matrix == '0'] = '#'
     return all_events, foot_matrix
+
+
+def check_is_unrelated(parallel_relation, causal_relation, item_set_1, item_set_2):
+    S = set(product(item_set_1, item_set_2)).union(set(product(item_set_2, item_set_1)))
+    for pair in S:
+        if pair in parallel_relation or pair in causal_relation:
+            return True
+    return False
+
+
+def pair_maximizer(alpha_pairs, pair):
+    for alt in alpha_pairs:
+        if pair != alt and pair[0].issubset(alt[0]) and pair[1].issubset(alt[1]):
+            return False
+    return True
+
+
+def find_more_sets_new(pairs, causals, parallels):
+    for i in range(0, len(pairs)):
+        t1 = pairs[i]
+        for j in range(i, len(pairs)):
+            t2 = pairs[j]
+            if t1 != t2:
+                if t1[0].issubset(t2[0]) or t1[1].issubset(t2[1]):
+                    if not (check_is_unrelated(parallels, causals,
+                                                 t1[0], t2[0]) or check_is_unrelated(parallels, causals, t1[1], t2[1])):
+                        new_alpha_pair = (t1[0] | t2[0], t1[1] | t2[1])
+                        if new_alpha_pair not in pairs:
+                            pairs.append((t1[0] | t2[0], t1[1] | t2[1]))
+    internal_places = filter(lambda p: pair_maximizer(pairs, p), pairs)
+    #print(internal_places)
+    final = []
+    for pair in internal_places:
+        final.append(tuple(pair))
+    return final
+
+
+def initial_filter(parallel_relation, pair):
+    if (pair[0], pair[0]) in parallel_relation or (pair[1], pair[1]) in parallel_relation:
+        return False
+    return True
 
 
 def create_footprint_matrix(dataframe):
@@ -106,61 +148,11 @@ def find_more_sets(sets, non_related):
 
 
 def find_possible_sets(causals_set, non_related_set):
-    #print(non_related)
-    non_related_set_copy = non_related_set.copy()
-    for nr in non_related_set_copy:
-        if nr[0] == nr[1]:
-            non_related_set.remove(nr)
-        else:
-            continue
-    xl = causals_set.copy()
-    for nr in non_related_set:
-        for causals in causals_set:
-            #print(causals)
-            #print(nr)
-            if (causals[0], nr[0]) in causals_set and (causals[0], nr[1]) in causals_set:
-                xl.add((causals[0], (nr)))
-            if (nr[0], causals[1]) in causals_set and (nr[1], causals[1]) in causals_set:
-                xl.add(((nr), causals[1]))
-
-    yl = xl.copy()
-    #print(xl)
-    for x in xl:
-        a = set(x[0])
-        b = set(x[1])
-        for y in xl:
-            if a.issubset(y[0]) and b.issubset(y[1]):
-                if x != y:
-                    yl.discard(x)
-                    break
-    to = yl.copy()
-    for t in to:
-        for x in xl:
-            if t == x[0]:
-                yl.discard(t)
-
-    ql = list(yl)
-    fin = find_more_sets(yl, non_related)
-    while True:
-        last = fin
-        fin = find_more_sets(fin, non_related)
-        if not fin:
-            break
-    fin = last
-    for set1 in ql:
-        fin.append(set1)
-    fin = set(fin)
-    yl = fin.copy()
-    #print(xl)
-    for x in fin:
-        a = set(x[0])
-        b = set(x[1])
-        for y in fin:
-            if a.issubset(y[0]) and b.issubset(y[1]):
-                if x != y:
-                    yl.discard(x)
-                    break
-    yl = list(yl)
+    pairs = list(map(lambda p: ({p[0]}, {p[1]}),
+                     filter(lambda p: initial_filter(non_related_set, p),
+                            causals_set)))
+    yl = find_more_sets_new(pairs, causals_set, non_related_set)
+    #print(yl)
     return yl
 
 
@@ -199,7 +191,7 @@ def transitions(set):
             temp = list(set[i])
             for j in range(len(temp)):
                 string = ''
-                if isinstance(temp[j], tuple):
+                if isinstance(temp[j], object) and temp[j] != 'START' and temp[j] != 'END':
                     list_of_strings = [str(s) for s in temp[j]]
                     string = ";".join(list_of_strings)
                 elif isinstance(temp[j], str):
@@ -211,12 +203,16 @@ def transitions(set):
     return transitions
 
 
-def activities(all_events):
+def activities(all_events, start_events, end_events):
     activities = []
     for i in range(len(all_events)):
         activities.append([])
-        activities[i].append('a')
+        activities[i].append('n')
         activities[i].append(all_events[i])
+    if len(start_events) > 1:
+        activities.append(['n', 'START'])
+    if len(end_events) > 1:
+        activities.append(['n', 'END'])
     return activities
 
 
@@ -248,5 +244,5 @@ causality, parallel, non_related = create_footprint_matrix(df)
 sets = find_possible_sets(causality, parallel)
 final_set = insert_start_end(sets, start_events, end_events)
 transitions = transitions(final_set)
-activities = activities(all_events)
+activities = activities(all_events, start_events, end_events)
 write_to_csv(transitions, activities, 'transition_result', cur_dir_path)
