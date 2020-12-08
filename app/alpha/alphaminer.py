@@ -176,15 +176,17 @@ def transitions(set):
         transitions.append([])
     for i in range(len(set)):
         if i == 0:
-            transitions[i].append('t')
-            transitions[i].append('t'+str(i))
-            transitions[i].append('')
-            transitions[i].append(set[i])
+            continue
+            # transitions[i].append('t')
+            # transitions[i].append('t'+str(i))
+            # transitions[i].append('')
+            # transitions[i].append(set[i])
         elif i == len(set) - 1:
-            transitions[i].append('t')
-            transitions[i].append('t' + str(i))
-            transitions[i].append(set[i])
-            transitions[i].append('')
+            continue
+            # transitions[i].append('t')
+            # transitions[i].append('t' + str(i))
+            # transitions[i].append(set[i])
+            # transitions[i].append('')
         else:
             transitions[i].append('t')
             transitions[i].append('t' + str(i))
@@ -200,6 +202,8 @@ def transitions(set):
                     transitions[i].append(string)
                 elif j == 1:
                     transitions[i].append(string)
+    transitions.pop(0)
+    transitions.pop(len(transitions)-1)
     return transitions
 
 
@@ -217,7 +221,7 @@ def activities(all_events, start_events, end_events):
 
 
 def write_to_csv(transitions, activities, name, path):
-    #print(transitions)
+    print(transitions)
     dir_path = path
     with open(os.path.join(dir_path, f"{name}.csv"), "w") as file:
         file.write("%s\n" % 'type,id,from,to')

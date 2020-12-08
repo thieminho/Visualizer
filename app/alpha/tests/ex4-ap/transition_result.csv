@@ -6,9 +6,7 @@ n,e
 n,d
 n,f
 n,END
-t,t0,,a
 t,t1,c,e
-t,t2,d,a;f
+t,t2,d,f;a
 t,t3,a;b,d;c;b
 t,t4,e;f,END
-t,t5,END,

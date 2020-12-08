@@ -205,15 +205,17 @@ def transitions(set):
         transitions.append([])
     for i in range(len(set)):
         if i == 0:
-            transitions[i].append('t')
-            transitions[i].append('t'+str(i))
-            transitions[i].append('')
-            transitions[i].append(set[i])
+            continue
+            # transitions[i].append('t')
+            # transitions[i].append('t'+str(i))
+            # transitions[i].append('')
+            # transitions[i].append(set[i])
         elif i == len(set) - 1:
-            transitions[i].append('t')
-            transitions[i].append('t' + str(i))
-            transitions[i].append(set[i])
-            transitions[i].append('')
+            continue
+            # transitions[i].append('t')
+            # transitions[i].append('t' + str(i))
+            # transitions[i].append(set[i])
+            # transitions[i].append('')
         else:
             transitions[i].append('t')
             transitions[i].append('t' + str(i))
@@ -229,6 +231,8 @@ def transitions(set):
                     transitions[i].append(string)
                 elif j == 1:
                     transitions[i].append(string)
+    transitions.pop(0)
+    transitions.pop(len(transitions)-1)
     return transitions
 
 
@@ -267,7 +271,7 @@ def write_to_csv(transitions, activities, name, path):
     return
 
 
-df = read_csv_into_df('tests/ex6/example6.csv')
+df = read_csv_into_df('example7.csv')
 all_events, start_events, end_events = find_sets(df)
 #preprocessing
 df, one_loops = preprocess_for_one_loops(df)

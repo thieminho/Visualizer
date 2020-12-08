@@ -5,8 +5,6 @@ n,c
 n,b
 n,START
 n,END
-t,t0,,START
 t,t1,START,a;b
 t,t2,b;a,c;d
 t,t3,d;c,END
-t,t4,END,
