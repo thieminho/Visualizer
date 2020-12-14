@@ -31,12 +31,13 @@ class Visualizer(QWebEngineView):
         for transition in transitions.itertuples(name='Transitions'):
             dictTran = transition._asdict()
             node_type, node_id, source, target = dictTran['type'], dictTran['id'], dictTran['_3'], dictTran['to']
-            self.net.add_node(node_id, shape='box', label=node_id)
+            self.net.add_node(node_id,shape='box',label=' ')
 
             if pd.notnull(source):
                 [self.net.add_edge(s, node_id) for s in source.split(';')]
             if pd.notnull(target):
                 [self.net.add_edge(node_id, s) for s in target.split(';')]
+
 
     def load_data(self):
         print(f'Loading data from {self.file_name}')
