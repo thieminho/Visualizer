@@ -22,12 +22,12 @@ class Visualizer(QWebEngineView):
         for node in nodes.itertuples(name='Nodes'):
             dictNode = node._asdict()
             node_type, node_id = dictNode['type'], dictNode['id']
-            self.net.add_node(node_id, shape='circular')
+            self.net.add_node(node_id, shape='box')
 
         for transition in transitions.itertuples(name='Transitions'):
             dictTran = transition._asdict()
             node_type, node_id, source, target = dictTran['type'], dictTran['id'], dictTran['_3'], dictTran['to']
-            self.net.add_node(node_id, shape='box', label=node_id)
+            self.net.add_node(node_id, shape='circular', label='')
 
             if pd.notnull(source):
                 [self.net.add_edge(s, node_id) for s in source.split(';')]
