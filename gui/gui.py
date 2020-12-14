@@ -61,7 +61,7 @@ class App(QWidget):
         self.load_graph.clicked.connect(self.on_load_clicked)
         # TEMPORARY TO CHECK LAYOUT OPTIONS
         # data = pd.read_csv("https://www.macalester.edu/~abeverid/data/stormofswords.csv")
-        data = pd.read_csv("../test.csv")
+        data = "../test_log_june_1_fuzzy_result.csv"
         self.visualizer = Visualizer(data)
         self.visualizer.set_graph_to_network()
         grid.addWidget(self.visualizer, 0, 1, 4, 1)
