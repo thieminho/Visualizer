@@ -1,0 +1,9 @@
+type,id,from,to
+a,a
+a,b
+a,d
+a,c
+t,t0,,a
+t,t1,ca,b
+t,t2,b,cd
+t,t3,d,
