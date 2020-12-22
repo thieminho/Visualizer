@@ -5,6 +5,7 @@ import pandas as pd
 import fnmatch
 
 
+
 class Visualizer(QWebEngineView):
 
     def __init__(self):
