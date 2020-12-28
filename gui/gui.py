@@ -1,27 +1,17 @@
 import sys
 import pandas as pd
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QComboBox, QLabel, QFileDialog, QGridLayout, QMessageBox
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QLabel, QFileDialog, QGridLayout, QMessageBox, QVBoxLayout
+from PyQt5.QtCore import pyqtSlot, QMutex
 import glob
 import importlib
 import importlib.util
 
-from plugins.parameters.GeneralParameters import GeneralParameters
 from visualizer.visualizer import Visualizer
 
 
 class App(QWidget):
     def __init__(self):
         super().__init__()
-        self.label = QLabel(self)
-        self.button_start = QPushButton("Uruchom", self)
-        self.visualizer = Visualizer()
-        self.qlabel = QLabel(self)
-        self.combo = QComboBox(self)
-        self.label_file = QLabel(self)
-        self.button_load = QPushButton('Wybierz plik', self)
-        self.grid = QGridLayout(self)
-        self.parameterLayout = GeneralParameters()
         self.list_of_files = glob.glob("plugins\*.py")
         self.list_of_files = [x.split('.')[0] for x in self.list_of_files]
         self.list_of_files = [x.split('\\')[-1] for x in self.list_of_files]
@@ -31,25 +21,32 @@ class App(QWidget):
         self.title = 'Visualizer'
         self.left = 10
         self.top = 10
-        self.width = 500
-        self.height = 400
+        self.width = 800
+        self.height = 600
 
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-
-        self.grid.addWidget(self.button_load, 0, 0)
+        self.label = QLabel(self)
+        self.button_start = QPushButton("Uruchom", self)
+        self.visualizer = Visualizer()
+        self.qlabel = QLabel(self)
+        self.combo = QComboBox(self)
+        self.label_file = QLabel(self)
+        self.button_load = QPushButton('Wybierz plik', self)
+        grid = QGridLayout(self)
+        grid.addWidget(self.button_load, 0, 0)
         self.button_load.clicked.connect(self.on_click)
-        self.grid.addWidget(self.label_file, 1, 0)
+        grid.addWidget(self.label_file, 1, 0)
         self.label_file.setText("Nie wybrano pliku")
         self.label_file.adjustSize()
 
         self.combo.addItem(" ")
         self.combo.addItems(self.list_of_files)
-        self.grid.addWidget(self.combo, 2, 0)
-        self.grid.addWidget(self.qlabel, 3, 0)
+        grid.addWidget(self.combo, 2, 0)
+        grid.addWidget(self.qlabel, 3, 0)
         self.qlabel.setText("Nie wybrano modułu")
         self.qlabel.adjustSize()
         self.combo.activated[str].connect(self.onChanged)
@@ -59,18 +56,17 @@ class App(QWidget):
         # self.load_graph.clicked.connect(self.on_load_clicked)
         # file_name = "transition_result.csv"
         # self.visualizer.set_graph_to_network()
-        self.grid.addWidget(self.visualizer, 0, 1, 4, 1)
-        self.grid.setColumnStretch(0, 1)
-        self.grid.setColumnStretch(1, 4)
-        self.setLayout(self.grid)
+        grid.addWidget(self.visualizer, 0, 1, 4, 1)
+        grid.setColumnStretch(0, 1)
+        grid.setColumnStretch(1, 4)
+        self.setLayout(grid)
 
         self.button_start.resize(30, 10)
-        self.grid.addWidget(self.button_start, 5, 0)
+        grid.addWidget(self.button_start, 5, 0)
         self.button_start.clicked.connect(self.analyze_data)
         # self.label.setFixedSize(100, 50)
-        self.grid.addWidget(self.label)
-        self.parameterLayout.setVisible(False)
-        self.grid.addWidget(self.parameterLayout, 0, 2, 4, 1)
+        grid.addWidget(self.label)
+
         self.show()
 
     def on_load_clicked(self):
@@ -99,7 +95,6 @@ class App(QWidget):
         print(self.PLUGIN_NAME)
         self.plugin_module = importlib.import_module(self.PLUGIN_NAME, ".")
         # TODO: add custom plugin parameters box show. For now display only general parameters
-        self.parameterLayout.setVisible(True)
 
 
     @pyqtSlot()

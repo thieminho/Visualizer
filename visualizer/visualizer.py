@@ -1,16 +1,14 @@
 from pyvis.network import Network
-import networkx as nx
 from PyQt5.QtWebEngineWidgets import *
 import pandas as pd
 import fnmatch
-
 
 
 class Visualizer(QWebEngineView):
 
     def __init__(self):
         super().__init__()
-        #self.file_name = file_name
+        # self.file_name = file_name
         self.net = Network(height="100%", width="100%", notebook=False, directed=True)
         self.net.set_edge_smooth(smooth_type='dynamic')
         self.used = False
@@ -32,7 +30,7 @@ class Visualizer(QWebEngineView):
         for transition in transitions.itertuples(name='Transitions'):
             dictTran = transition._asdict()
             node_type, node_id, source, target = dictTran['type'], dictTran['id'], dictTran['_3'], dictTran['to']
-            self.net.add_node(node_id,shape='box',label=' ')
+            self.net.add_node(node_id, shape='box', label=' ')
 
             if pd.notnull(source):
                 [self.net.add_edge(s, node_id) for s in source.split(';')]
@@ -61,7 +59,7 @@ class Visualizer(QWebEngineView):
             dictEdge = edge._asdict()
             node_type, node_id, significance, source, target = \
                 dictEdge['type'], dictEdge['id'], dictEdge['significance'], dictEdge['_4'], dictEdge['to']
-            self.net.add_edge(source, target, title=f'{significance}', width=significance*4)
+            self.net.add_edge(source, target, title=f'{significance}', width=significance * 4)
         self.net.options.layout.hierarchical.sortMethod = 'directed'
         self.net.toggle_physics(False)
 
@@ -74,7 +72,6 @@ class Visualizer(QWebEngineView):
             self.load_fuzzy_data(data=data)
         else:
             print(f'file {self.file_name} not matched regex')
-
 
     def set_graph_to_network(self, filename):
         print("setting Graph for Network")
