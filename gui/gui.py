@@ -5,12 +5,23 @@ from PyQt5.QtCore import pyqtSlot
 import glob
 import importlib
 import importlib.util
+
+from plugins.parameters.GeneralParameters import GeneralParameters
 from visualizer.visualizer import Visualizer
 
 
 class App(QWidget):
     def __init__(self):
         super().__init__()
+        self.label = QLabel(self)
+        self.button_start = QPushButton("Uruchom", self)
+        self.visualizer = Visualizer()
+        self.qlabel = QLabel(self)
+        self.combo = QComboBox(self)
+        self.label_file = QLabel(self)
+        self.button_load = QPushButton('Wybierz plik', self)
+        self.grid = QGridLayout(self)
+        self.parameterLayout = GeneralParameters()
         self.list_of_files = glob.glob("plugins\*.py")
         self.list_of_files = [x.split('.')[0] for x in self.list_of_files]
         self.list_of_files = [x.split('\\')[-1] for x in self.list_of_files]
@@ -29,48 +40,38 @@ class App(QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        grid = QGridLayout(self)
-
-        self.button_load = QPushButton('Wybierz plik', self)
-        grid.addWidget(self.button_load, 0, 0)
+        self.grid.addWidget(self.button_load, 0, 0)
         self.button_load.clicked.connect(self.on_click)
-        self.label_file = QLabel(self)
-        grid.addWidget(self.label_file, 1, 0)
+        self.grid.addWidget(self.label_file, 1, 0)
         self.label_file.setText("Nie wybrano pliku")
         self.label_file.adjustSize()
 
-        self.combo = QComboBox(self)
         self.combo.addItem(" ")
         self.combo.addItems(self.list_of_files)
-        grid.addWidget(self.combo, 2, 0)
-        self.qlabel = QLabel(self)
-        grid.addWidget(self.qlabel, 3, 0)
+        self.grid.addWidget(self.combo, 2, 0)
+        self.grid.addWidget(self.qlabel, 3, 0)
         self.qlabel.setText("Nie wybrano modułu")
         self.qlabel.adjustSize()
         self.combo.activated[str].connect(self.onChanged)
 
+        # self.load_graph = QPushButton('Load Test Graph', self)
+        # grid.addWidget(self.load_graph, 4, 0)
+        # self.load_graph.clicked.connect(self.on_load_clicked)
+        # file_name = "transition_result.csv"
+        # self.visualizer.set_graph_to_network()
+        self.grid.addWidget(self.visualizer, 0, 1, 4, 1)
+        self.grid.setColumnStretch(0, 1)
+        self.grid.setColumnStretch(1, 4)
+        self.setLayout(self.grid)
 
-
-        #self.load_graph = QPushButton('Load Test Graph', self)
-        #grid.addWidget(self.load_graph, 4, 0)
-        #self.load_graph.clicked.connect(self.on_load_clicked)
-        #file_name = "transition_result.csv"
-        self.visualizer = Visualizer()
-        #self.visualizer.set_graph_to_network()
-        grid.addWidget(self.visualizer, 0, 1, 4, 1)
-        grid.setColumnStretch(0, 1)
-        grid.setColumnStretch(1, 4)
-        self.setLayout(grid)
-
-        self.button_start = QPushButton("Uruchom", self)
         self.button_start.resize(30, 10)
-        grid.addWidget(self.button_start, 5, 0)
+        self.grid.addWidget(self.button_start, 5, 0)
         self.button_start.clicked.connect(self.analyze_data)
-        self.label = QLabel(self)
-        #self.label.setFixedSize(100, 50)
-        grid.addWidget(self.label)
+        # self.label.setFixedSize(100, 50)
+        self.grid.addWidget(self.label)
+        self.parameterLayout.setVisible(False)
+        self.grid.addWidget(self.parameterLayout, 0, 2, 4, 1)
         self.show()
-
 
     def on_load_clicked(self):
         print('Loading the test graph')
@@ -86,7 +87,7 @@ class App(QWidget):
             print(self.fileName)
             with open(self.fileName) as file:
                 self.loaded_file = pd.read_csv(self.fileName)
-        #print(self.loaded_file)
+        # print(self.loaded_file)
         self.label_file.setText("Wybrany plik: " + self.fileName)
         self.label_file.adjustSize()
 
@@ -97,6 +98,8 @@ class App(QWidget):
         self.PLUGIN_NAME += text
         print(self.PLUGIN_NAME)
         self.plugin_module = importlib.import_module(self.PLUGIN_NAME, ".")
+        # TODO: add custom plugin parameters box show. For now display only general parameters
+        self.parameterLayout.setVisible(True)
 
 
     @pyqtSlot()
@@ -137,9 +140,9 @@ class App(QWidget):
             self.visualizer.clear()
             self.visualizer.set_graph_to_network(filename=self.result_file)
             self.visualizer.show()
-            #del self.visualizer
+            # del self.visualizer
         else:
-            #self.visualizer = Visualizer()
+            # self.visualizer = Visualizer()
             # self.visualizer.set_graph_to_network()
             '''grid.addWidget(self.visualizer, 0, 1, 4, 1)
             grid.setColumnStretch(0, 1)
@@ -249,8 +252,8 @@ class App(QWidget):
 #         self.qlabel.setText("Wybrany moduł: " + text)
 #         self.qlabel.adjustSize()
 # '''
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = App()
-    sys.exit(app.exec_())
+#
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
+#     ex = App()
+#     sys.exit(app.exec_())
