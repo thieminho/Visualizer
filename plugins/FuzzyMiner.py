@@ -46,7 +46,6 @@ class Plugin:
         fm.apply_config(config)
         return "success", fm.full_path
 
-
 class FuzzyMiner:
     def ___init___(self, log, path):
         self.name = path[-1]
@@ -480,8 +479,7 @@ class FuzzyMiner:
                     ref_index = look_back_indices[k]
                     att_factor = self.config.attenuation.get_attenuation_factor(k)
                     # print(self.binary_edge_frequency_values)
-                    print(self.binary_edge_frequency_values[ref_index][follower_index], ref_index, follower_index,
-                          att_factor)
+                    print(self.binary_edge_frequency_values[ref_index][follower_index],ref_index,follower_index, att_factor)
                     self.binary_edge_frequency_values[ref_index][follower_index] += att_factor
                     # print(self.binary_edge_frequency_values[ref_index][follower_index], att_factor, end=' ')
                     if self.metric_settings["proximity_correlation_binary"][0]:
@@ -1219,6 +1217,8 @@ class FuzzyMiner:
         self.node_cluster_mapping[own_idx] = -1
 
 
+
+
 class Node:
     def __init__(self, index, label, significance, node_type="primitive"):
         self.index = index
@@ -1227,8 +1227,7 @@ class Node:
         self.node_type = node_type
 
     def __str__(self):
-        return self.label + " index: " + str(self.index) + " significance: " + str(
-            self.significance) + " and type: " + self.node_type
+        return self.label+" index: "+str(self.index)+" significance: "+str(self.significance)+" and type: "+self.node_type
 
 
 class Edge:
@@ -1240,8 +1239,7 @@ class Edge:
         self.correlation = correlation
 
     def __str__(self):
-        return "source: " + str(self.source) + " target: " + str(self.target) + " significance: " + str(
-            self.significance) + " correlation: " + str(self.correlation)
+        return "source: "+ str(self.source)+" target: "+str(self.target)+" significance: "+str(self.significance)+" correlation: "+str(self.correlation)
 
 
 class Cluster(Node):
@@ -1256,8 +1254,7 @@ class Cluster(Node):
         return self.primitives
 
     def __str__(self):
-        return self.label + " index: " + str(self.index) + " mean significance: " + str(
-            self.significance) + " has primitives: " + str(self.get_primitives())
+        return self.label+" index: "+str(self.index)+" mean significance: "+str(self.significance)+" has primitives: "+str(self.get_primitives())
 
 
 class Filter:
@@ -1293,8 +1290,7 @@ class EdgeFilter(Filter):
                 self.sc_ratio) + " Preserve: " + str(self.preserve) + " Ignore Self Loops: " + str(
                 self.ignore_self_loops) + " Interpret Absolute: " + str(self.interpret_abs)
         else:
-            return super().__str__() + "Edge Transform: " + str(self.edge_transform) + " Ignore Self Loops: " + str(
-                self.ignore_self_loops)
+            return super().__str__() + "Edge Transform: " + str(self.edge_transform)+" Ignore Self Loops: " + str(self.ignore_self_loops)
 
 
 class ConcurrencyFilter(Filter):
@@ -1427,5 +1423,5 @@ class NRootAttenuation(Attenuation):
     def __str__(self):
         return " Echelons Value: " + str(self.echelons)
 
-# test = Plugin()
-# test.execute()
+#test = Plugin()
+#test.execute()

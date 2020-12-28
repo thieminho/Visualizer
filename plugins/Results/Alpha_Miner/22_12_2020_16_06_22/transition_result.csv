@@ -1,0 +1,11 @@
+type,id,from,to
+n,x
+n,a
+n,e
+n,b
+n,c
+n,d
+t,t0,,x
+t,t1,d;c;a;b,e
+t,t2,x,d;c;a;b
+t,t3,e,
