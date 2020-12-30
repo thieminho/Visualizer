@@ -5,11 +5,16 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
+from PyQt5.QtWidgets import QVBoxLayout
+
 
 class Plugin:
     def __init__(self, *args, **kwargs):
         print('Plugin init ("Alpha Miner"):', args, kwargs)
         self.df = self.read_csv_into_df(args[0])
+
+    def fill_my_parameters(self, widget: QVBoxLayout):
+        pass
 
     def execute(self):
         cur_dir_path = os.path.dirname(os.path.realpath(__file__))

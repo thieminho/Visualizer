@@ -5,7 +5,7 @@ import importlib.util
 import pandas as pd
 from PyQt5.QtCore import pyqtSlot, QMutex
 from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QLabel, QFileDialog, QGridLayout, \
-    QMessageBox, QVBoxLayout
+    QMessageBox, QVBoxLayout, QColorDialog
 
 from visualizer.visualizer import Visualizer
 
@@ -104,6 +104,7 @@ class App(QWidget):
         self.PLUGIN_NAME += text
         print(self.PLUGIN_NAME)
         self.plugin_module = importlib.import_module(self.PLUGIN_NAME, ".")
+        plugin = self.plugin_module.Plugin(self.fileName)
         print(self.grid.columnCount())
         if self.parameters == None:
             print('Adding parameters to window')
@@ -111,11 +112,11 @@ class App(QWidget):
             self.grid.addLayout(self.parameters, 0, 2, 4, 1)
             self.fill_base_parameters()
             #add fill_specific_parameters()
-            # self.plugin_module.fill_my_parameters(self.parameters)
+            plugin.fill_my_parameters(self.parameters)
         else:
             self.grid.addLayout(self.parameters, 0, 2, 4, 1)
             self.clearLayout(self.parameters)
-            # self.plugin_module.fill_my_parameters(self.parameters)
+            plugin.fill_my_parameters(self.parameters)
             self.fill_base_parameters()
 
 
@@ -179,19 +180,16 @@ class App(QWidget):
             self.grid.removeItem(self.parameters)
 
     def fill_base_parameters(self):
+        # TODO: Change it to colorPicker
         self.edge_color_choice = QComboBox(self)
         self.node_color_choice = QComboBox(self)
         node_color_label = QLabel('Choose Node Color:')
         colors = ['red', 'green', 'blue', 'purple', 'black', 'white']
-        background_color_label = QLabel('Choose Background Color:')
         edge_color_label = QLabel('Choose Edge Color:')
         self.parameters.addWidget(node_color_label)
         self.node_color_choice.addItems(colors)
         self.parameters.addWidget(self.node_color_choice)
-        # add background color choice.
-        # self.parameters.addWidget(background_color_label)
-        # self.background_color_choice.addItems(colors)
-        # self.parameters.addWidget(self.background_color_choice)
+
         # add edge color choice.
         self.parameters.addWidget(edge_color_label)
         self.edge_color_choice.addItems(colors)
