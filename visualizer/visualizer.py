@@ -9,8 +9,13 @@ class Visualizer(QWebEngineView):
     def __init__(self):
         super().__init__()
         # self.file_name = file_name
-        self.net = Network(height="100%", width="100%", notebook=False, directed=True)
+        self.font_color = 'white'
+        self.background_color = 'white'
+        self.net = Network(height="100%", width="100%", notebook=False, directed=True, font_color=self.font_color,bgcolor=self.background_color)
         self.net.set_edge_smooth(smooth_type='dynamic')
+
+        self.base_color = 'blue'
+        self.base_edge_color = 'black'
         self.used = False
 
     def __del__(self):
@@ -25,17 +30,17 @@ class Visualizer(QWebEngineView):
         for node in nodes.itertuples(name='Nodes'):
             dictNode = node._asdict()
             node_type, node_id = dictNode['type'], dictNode['id']
-            self.net.add_node(node_id, shape='circular')
+            self.net.add_node(node_id, shape='circular', color=self.base_color)
 
         for transition in transitions.itertuples(name='Transitions'):
             dictTran = transition._asdict()
             node_type, node_id, source, target = dictTran['type'], dictTran['id'], dictTran['_3'], dictTran['to']
-            self.net.add_node(node_id, shape='box', label=' ')
+            self.net.add_node(node_id, shape='box', label=' ', color='black')
 
             if pd.notnull(source):
-                [self.net.add_edge(s, node_id) for s in source.split(';')]
+                [self.net.add_edge(s, node_id, color=self.base_edge_color) for s in source.split(';')]
             if pd.notnull(target):
-                [self.net.add_edge(node_id, s) for s in target.split(';')]
+                [self.net.add_edge(node_id, s,color=self.base_edge_color) for s in target.split(';')]
 
     def load_fuzzy_data(self, data):
         self.net = Network(height="100%", width="100%", notebook=False, directed=True, layout=True)
@@ -48,18 +53,18 @@ class Visualizer(QWebEngineView):
         for node in nodes.itertuples(name='Nodes'):
             dictNode = node._asdict()
             node_type, node_id, significance = dictNode['type'], dictNode['id'], dictNode['significance']
-            self.net.add_node(node_id, shape='circular', title=f'{significance}')
+            self.net.add_node(node_id, shape='circular', title=f'{significance}',color=self.base_color)
 
         for cluster in clusters.itertuples(name='Clusters'):
             dictClus = cluster._asdict()
             node_type, node_id, significance = dictClus['type'], dictClus['id'], dictClus['significance']
-            self.net.add_node(node_id, shape='box', title=f'{significance}')
+            self.net.add_node(node_id, shape='box', title=f'{significance}', color='orange')
 
         for edge in edges.itertuples(name='Edges'):
             dictEdge = edge._asdict()
             node_type, node_id, significance, source, target = \
                 dictEdge['type'], dictEdge['id'], dictEdge['significance'], dictEdge['_4'], dictEdge['to']
-            self.net.add_edge(source, target, title=f'{significance}', width=significance * 4)
+            self.net.add_edge(source, target, title=f'{significance}', width=significance * 4, color=self.base_edge_color)
         self.net.options.layout.hierarchical.sortMethod = 'directed'
         self.net.toggle_physics(False)
 
