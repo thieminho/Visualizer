@@ -14,7 +14,7 @@
         #mynetwork {
             width: 100%;
             height: 100%;
-            background-color: #ffffff;
+            background-color: white;
             border: 1px solid lightgray;
             position: relative;
             float: left;
@@ -50,8 +50,8 @@
         
 
         // parsing and collecting nodes and edges from the python
-        nodes = new vis.DataSet([{"id": "a", "label": "a", "shape": "circular"}, {"id": "b", "label": "b", "shape": "circular"}, {"id": "c", "label": "c", "shape": "circular"}, {"id": "t0", "label": "t0", "shape": "box"}, {"id": "t1", "label": "t1", "shape": "box"}, {"id": "t2", "label": "t2", "shape": "box"}, {"id": "t3", "label": "t3", "shape": "box"}]);
-        edges = new vis.DataSet([{"arrows": "to", "from": "t0", "to": "a"}, {"arrows": "to", "from": "a", "to": "t1"}, {"arrows": "to", "from": "t1", "to": "b"}, {"arrows": "to", "from": "b", "to": "t2"}, {"arrows": "to", "from": "t2", "to": "c"}, {"arrows": "to", "from": "c", "to": "t3"}]);
+        nodes = new vis.DataSet([{"color": "red", "font": {"color": "white"}, "id": "a", "label": "a", "shape": "circular"}, {"color": "red", "font": {"color": "white"}, "id": "b", "label": "b", "shape": "circular"}, {"color": "red", "font": {"color": "white"}, "id": "c", "label": "c", "shape": "circular"}, {"color": "black", "font": {"color": "white"}, "id": "t0", "label": " ", "shape": "box"}, {"color": "black", "font": {"color": "white"}, "id": "t1", "label": " ", "shape": "box"}, {"color": "black", "font": {"color": "white"}, "id": "t2", "label": " ", "shape": "box"}, {"color": "black", "font": {"color": "white"}, "id": "t3", "label": " ", "shape": "box"}]);
+        edges = new vis.DataSet([{"arrows": "to", "color": "red", "from": "t0", "to": "a"}, {"arrows": "to", "color": "red", "from": "a", "to": "t1"}, {"arrows": "to", "color": "red", "from": "t1", "to": "b"}, {"arrows": "to", "color": "red", "from": "b", "to": "t2"}, {"arrows": "to", "color": "red", "from": "t2", "to": "c"}, {"arrows": "to", "color": "red", "from": "c", "to": "t3"}]);
 
         // adding nodes and edges to the graph
         data = {nodes: nodes, edges: edges};
