@@ -10,13 +10,14 @@ from PyQt5.QtWidgets import QVBoxLayout
 
 class Plugin:
     def __init__(self, *args, **kwargs):
-        print('Plugin init ("Alpha Miner"):', args, kwargs)
-        self.df = self.read_csv_into_df(args[0])
+        print('Plugin init ("Alpha Miner")')
+
 
     def fill_my_parameters(self, widget: QVBoxLayout):
         pass
 
-    def execute(self):
+    def execute(self, *args, **kwargs):
+        self.df = self.read_csv_into_df(args[0])
         cur_dir_path = os.path.dirname(os.path.realpath(__file__))
         all_events, start_events, end_events = self.find_sets(self.df)
         causality, parallel, non_related = self.create_footprint_matrix(self.df)
@@ -197,18 +198,18 @@ class Plugin:
             transitions.append([])
         for i in range(len(set)):
             if i == 0:
-                transitions[i].append('t')
-                transitions[i].append('t' + str(i))
+                transitions[i].append('p')
+                transitions[i].append('p' + str(i))
                 transitions[i].append('')
                 transitions[i].append(set[i])
             elif i == len(set) - 1:
-                transitions[i].append('t')
-                transitions[i].append('t' + str(i))
+                transitions[i].append('p')
+                transitions[i].append('p' + str(i))
                 transitions[i].append(set[i])
                 transitions[i].append('')
             else:
-                transitions[i].append('t')
-                transitions[i].append('t' + str(i))
+                transitions[i].append('p')
+                transitions[i].append('p' + str(i))
                 temp = list(set[i])
                 for j in range(len(temp)):
                     string = ''

@@ -7,13 +7,19 @@ from itertools import product
 
 
     # TODO: Preprocessing logs to the form of case_id, act_name?
+from PyQt5.QtWidgets import QVBoxLayout
+
 
 class Plugin:
     def __init__(self, *args, **kwargs):
         print('Plugin init ("Alpha Plus"):', args, kwargs)
-        self.df = self.read_csv_into_df(args[0])
 
-    def execute(self):
+
+    def fill_my_parameters(self, widget: QVBoxLayout):
+        pass
+
+    def execute(self, *args, **kwargs):
+        self.df = self.read_csv_into_df(args[0])
         cur_dir_path = os.path.dirname(os.path.realpath(__file__))
         all_events, start_events, end_events = self.find_sets(self.df)
         # preprocessing
@@ -220,27 +226,24 @@ class Plugin:
             possible_sets.append(end[0])
         return possible_sets
 
-
     def transitions(self, set):
         transitions = []
         for i in range(len(set)):
             transitions.append([])
         for i in range(len(set)):
             if i == 0:
-                continue
-                # transitions[i].append('t')
-                # transitions[i].append('t'+str(i))
-                # transitions[i].append('')
-                # transitions[i].append(set[i])
+                transitions[i].append('p')
+                transitions[i].append('p' + str(i))
+                transitions[i].append('')
+                transitions[i].append(set[i])
             elif i == len(set) - 1:
-                continue
-                # transitions[i].append('t')
-                # transitions[i].append('t' + str(i))
-                # transitions[i].append(set[i])
-                # transitions[i].append('')
+                transitions[i].append('p')
+                transitions[i].append('p' + str(i))
+                transitions[i].append(set[i])
+                transitions[i].append('')
             else:
-                transitions[i].append('t')
-                transitions[i].append('t' + str(i))
+                transitions[i].append('p')
+                transitions[i].append('p' + str(i))
                 temp = list(set[i])
                 for j in range(len(temp)):
                     string = ''
@@ -253,8 +256,6 @@ class Plugin:
                         transitions[i].append(string)
                     elif j == 1:
                         transitions[i].append(string)
-        transitions.pop(0)
-        transitions.pop(len(transitions)-1)
         return transitions
 
 
