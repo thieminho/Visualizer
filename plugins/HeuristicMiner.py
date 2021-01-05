@@ -4,11 +4,7 @@ import pandas as pd
 
 class Plugin:
     def __init__(self, *args, **kwargs):
-        print('Plugin init ("Heuristic Miner"):', args, kwargs)
-        self.fullpath = args[0]
-        self.df = pd.read_csv(args[0])
-        self.traces = self.get_traces()
-
+        print('Plugin init ("Heuristic Miner")')
         self.dependency_threshold = None  # 0.9 (0;1)
         self.positive_observations_threshold = None  # 1 (int >=1)
         self.relative_to_best_threshold = None  # 0.05 (0;1)
@@ -34,7 +30,9 @@ class Plugin:
         self.relative_to_best_threshold = 0.4"""
 
     # Assumes fill_my_parameters was already called, if not add it in the first line
-    def execute(self):
+    def execute(self,*args, **kwargs):
+        self.fullpath = args[0]
+        self.df = pd.read_csv(args[0])
         traces = self.get_traces()
         events = self.all_events()
         followage_occurrences = self.cal_foll_occ(traces, events)
