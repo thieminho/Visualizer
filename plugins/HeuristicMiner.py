@@ -1,13 +1,13 @@
+from datetime import datetime
+
 from PyQt5.QtWidgets import QVBoxLayout
 import pandas as pd
+import os
 
 
 class Plugin:
     def __init__(self, *args, **kwargs):
         print('Plugin init ("Heuristic Miner"):', args, kwargs)
-        self.fullpath = args[0]
-        self.df = pd.read_csv(args[0])
-        self.traces = self.get_traces()
 
         self.dependency_threshold = None  # 0.9 (0;1)
         self.positive_observations_threshold = None  # 1 (int >=1)
@@ -15,7 +15,6 @@ class Plugin:
         self.len1_loop_threshold = None  # 0.9 (0;1)
         self.len2_loop_threshold = None  # 0.9 (0;1)
         self.long_distance_threshold = None  # 0.9 (0;1)
-        self.dependency_divisor = None  # 1 ?
         self.AND_threshold = None  # 0.1 (0;1)
 
     def fill_my_parameters(self, widget: QVBoxLayout):
@@ -34,7 +33,25 @@ class Plugin:
         self.relative_to_best_threshold = 0.4"""
 
     # Assumes fill_my_parameters was already called, if not add it in the first line
-    def execute(self):
+    def execute(self, *args, **kwargs):
+        self.fullpath = args[0]
+        self.df = pd.read_csv(args[0])
+        self.traces = self.get_traces()
+
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        dir_path = dir_path.replace("\\", "/") + '/Results/Heuristic_Miner/' + datetime.now().strftime(
+            "%d_%m_%Y_%H_%M_%S") + "/"
+        self.filename = self.fullpath.split('/')[-1]
+        print(self.filename)
+        self.out_name = self.filename[:-4] + '_HMresult'
+        print(dir_path)
+        self.full_path = os.path.join(dir_path, f"{self.out_name}.csv")
+        print(self.full_path)
+        os.makedirs(os.path.dirname(self.full_path), exist_ok=True)
+
+        # parameters for now
+        self.fill_my_parameters(None)
+        print(f'Executing algorithm with fullpath:{self.fullpath}')
         traces = self.get_traces()
         events = self.all_events()
         followage_occurrences = self.cal_foll_occ(traces, events)
@@ -57,12 +74,18 @@ class Plugin:
         """
         TODO: 
         add long-distance dependence
-        tranform causal matrix to petri net
         """
+
+        # So called "more sophisticated mapping", only works for work-flow nets from [7]
+        petri_net = self.causal_matrix_to_petri_net(causal_matrix, events)
+        print(petri_net)
+        file_name = self.petri_net_to_csv(petri_net)
+        
+
         # causal_matrix = self.long_distance(...)
         # petri_net_in_csv = self.to_petri_net(causal_matrix)
         # with open(full_path, 'w') etc.
-        # return "success", full_path
+        return "success", self.full_path
 
     # assumes simple .csv [case_id, act_name], at most I can add using time to determine order
     def get_traces(self):
@@ -358,3 +381,43 @@ class Plugin:
     def cal_and_relation_predecessor(self, event_a, event_b, event_c, follow_occs):
         return (follow_occs[event_b][event_c] + follow_occs[event_c][event_b]) /\
                (follow_occs[event_b][event_a] + follow_occs[event_c][event_a] + 1)
+
+    def causal_matrix_to_petri_net(self, causal_matrix, events):
+        X = set()
+        for name, event in causal_matrix.items():
+            for name_b, event_b in causal_matrix.items():
+                for xors_i in event['input']:
+                    for xors_o in event_b['output']:
+                        if name in xors_o and name_b in xors_i:
+                            X.add((tuple(xors_i), tuple(xors_o)))
+        places = set(X)
+        places.add("start_place")
+        places.add("end_place")
+        transitions = set(events)
+        arcs = set()
+        for event in events:
+            if len(causal_matrix[event]['input']) == 0:
+                arcs.add(("start_place", event))
+            if len(causal_matrix[event]['output']) == 0:
+                arcs.add((event, "end_place"))
+            for input_output_pair in X:
+                if event in input_output_pair[1]:
+                    arcs.add((input_output_pair, event))
+                if event in input_output_pair[0]:
+                    arcs.add((event, input_output_pair))
+        petri_net = (places, transitions, arcs)
+        print(places)
+        print(transitions)
+        print(arcs)
+        return petri_net
+
+    def petri_net_to_csv(self, petri_net):
+        with open(self.full_path, 'w') as result:
+            result.write('type;id;from;to\n')
+            for place in petri_net[0]:
+                result.write(f'p;{place};;\n')
+            for transition in petri_net[1]:
+                result.write(f't;{transition};;\n')
+            for edge in petri_net[2]:
+                result.write(f'e;{edge};{edge[0]};{edge[1]}\n')
+        pass

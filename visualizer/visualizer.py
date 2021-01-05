@@ -68,13 +68,40 @@ class Visualizer(QWebEngineView):
         self.net.options.layout.hierarchical.sortMethod = 'directed'
         self.net.toggle_physics(False)
 
+    def load_HM_data(self, data):
+        print(f'Constructing Petri Net Graph from {self.file_name}')
+        acctualData = pd.DataFrame(data, columns=['type', 'id', 'from', 'to'])
+        places = acctualData[acctualData['type'] == 'p']
+        transitions = acctualData[acctualData['type'] == 't']
+        edges = acctualData[acctualData['type'] == 'e']
+        print('here')
+        for place in places.itertuples(name='Places'):
+            dictPlace = place._asdict()
+            node_type, node_id = dictPlace['type'], dictPlace['id']
+            self.net.add_node(node_id, shape='circle',label=' ', color='black')
+        for transition in transitions.itertuples(name='Transitions'):
+            dictTran = transition._asdict()
+            node_type, node_id, source, target = dictTran['type'], dictTran['id'], dictTran['_3'], dictTran['to']
+            self.net.add_node(node_id, shape='box', label=f'{node_id}', color='self.base_color')
+        for edge in edges.itertuples(name='Edges'):
+            dictEdge = edge._asdict()
+            node_type, node_id, source, target = \
+                dictEdge['type'], dictEdge['id'], dictEdge['_3'], dictEdge['to']
+            self.net.add_edge(source, target, color=self.base_edge_color)
+
     def load_data(self):
         print(f'Loading data from {self.file_name}')
-        data = pd.read_csv(self.file_name)
         if fnmatch.fnmatch(self.file_name, '*transition*.csv'):
+            data = pd.read_csv(self.file_name)
             self.load_transition_data(data=data)
         if fnmatch.fnmatch(self.file_name, '*fuzzy*.csv'):
+            data = pd.read_csv(self.file_name)
             self.load_fuzzy_data(data=data)
+        if fnmatch.fnmatch(self.file_name, '*HMresult*.csv'):
+            print('regex found')
+            data = pd.read_csv(self.file_name, sep=';')
+            print(data)
+            self.load_HM_data(data=data)
         else:
             print(f'file {self.file_name} not matched regex')
 
