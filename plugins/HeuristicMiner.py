@@ -17,13 +17,7 @@ class Plugin:
 
     def fill_my_parameters(self, widget: QVBoxLayout):
         # parameters, you can bind these
-        self.dependency_threshold = 0.9  # 0.9 (0;1]
-        self.positive_observations_threshold = 1  # 1 (int >=1)
-        self.relative_to_best_threshold = 0.05  # 0.05 (0;1]
-        self.len1_loop_threshold = 0.9  # 0.9 (0;1]
-        self.len2_loop_threshold = 0.9  # 0.9 (0;1]
-        self.long_distance_threshold = 0.9  # 0.9 (0;1]
-        self.AND_threshold = 0.1  # 0.1 (0;1)
+
         widget.addWidget(QLabel('Działam'))
 
         # testing
@@ -33,6 +27,15 @@ class Plugin:
 
     # Assumes fill_my_parameters was already called, if not add it in the first line
     def execute(self, *args, **kwargs):
+        # for now
+        self.dependency_threshold = 0.9  # 0.9 (0;1]
+        self.positive_observations_threshold = 1  # 1 (int >=1)
+        self.relative_to_best_threshold = 0.05  # 0.05 (0;1]
+        self.len1_loop_threshold = 0.9  # 0.9 (0;1]
+        self.len2_loop_threshold = 0.9  # 0.9 (0;1]
+        self.long_distance_threshold = 0.9  # 0.9 (0;1]
+        self.AND_threshold = 0.1  # 0.1 (0;1)
+
         self.fullpath = args[0]
         self.df = pd.read_csv(args[0])
         self.traces = self.get_traces()
@@ -49,7 +52,7 @@ class Plugin:
         os.makedirs(os.path.dirname(self.full_path), exist_ok=True)
 
         # parameters for now
-        self.fill_my_parameters(None)
+        # self.fill_my_parameters(None)
         print(f'Executing algorithm with fullpath:{self.fullpath}')
         self.fullpath = args[0]
         self.df = pd.read_csv(args[0])
