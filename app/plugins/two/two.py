@@ -9,3 +9,6 @@ class Two(Plugin):
 
     def execute(self):
         return 5-4
+
+    def fill_my_parameters(self, widget):
+        pass

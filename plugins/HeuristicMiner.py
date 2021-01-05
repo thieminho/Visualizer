@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QLabel
 import pandas as pd
 
 
@@ -23,6 +23,7 @@ class Plugin:
         self.len2_loop_threshold = 0.9  # 0.9 (0;1]
         self.long_distance_threshold = 0.9  # 0.9 (0;1]
         self.AND_threshold = 0.1  # 0.1 (0;1)
+        widget.addWidget(QLabel('Działam'))
 
         # testing
         """self.dependency_threshold = 0.45

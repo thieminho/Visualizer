@@ -6,7 +6,7 @@ from json import loads, dumps
 
 import numpy as np
 import xmltodict
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QLabel
 
 
 class Plugin:
@@ -15,24 +15,7 @@ class Plugin:
         print('Plugin init ("Fuzzy Miner")')
 
     def fill_my_parameters(self, widget: QVBoxLayout):
-        # vBox = QVBoxLayout()
-        # hBox = QHBoxLayout()
-        # first_label = QLabel('name')
-        # vBox.addLayout(hBox, 0)
-        # hBox.addWidget(first_label)
-        # inverted = QCheckBox('Inverted', hBox)
-        # hBox.addWidget(inverted)
-        # active = QCheckBox('Active', hBox)
-        # hBox.addWidget(active)
-        # vBox.addLayout(hBox)
-        # slider = QSlider(Qt.Horizontal)
-        # slider.setRange(0, 1)
-        # vBox.addWidget(slider)
-        # # self.proximity_correlation_binary = self.add_metric( 'proximity_correlation_binary')
-        # widget.addWidget(vBox)
-        # self.endpoint_correlation_binary = self.add_metric( 'endpoint_correlation_binary')
-        # widget.addLayout(self.endpoint_correlation_binary)
-        pass
+        widget.addWidget(QLabel('Działam'))
 
     def execute(self, *args, **kwargs):
         self.fullpath = args[0]
