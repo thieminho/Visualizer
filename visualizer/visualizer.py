@@ -25,17 +25,17 @@ class Visualizer(QWebEngineView):
         print(f'Constructing Tranzition Graph from {self.file_name}')
         acctualData = pd.DataFrame(data, columns=['type', 'id', 'from', 'to'])
         nodes = acctualData[acctualData['type'] == 'n']
-        transitions = acctualData[acctualData['type'] == 't']
+        transitions = acctualData[acctualData['type'] == 'p']
 
         for node in nodes.itertuples(name='Nodes'):
             dictNode = node._asdict()
             node_type, node_id = dictNode['type'], dictNode['id']
-            self.net.add_node(node_id, shape='circular', color=self.base_color)
+            self.net.add_node(node_id, shape='box',label=node_id, color=self.base_color)
 
         for transition in transitions.itertuples(name='Transitions'):
             dictTran = transition._asdict()
             node_type, node_id, source, target = dictTran['type'], dictTran['id'], dictTran['_3'], dictTran['to']
-            self.net.add_node(node_id, shape='box', label=' ', color='black')
+            self.net.add_node(node_id, shape='circular', label=' ', color='black')
 
             if pd.notnull(source):
                 [self.net.add_edge(s, node_id, color=self.base_edge_color) for s in source.split(';')]

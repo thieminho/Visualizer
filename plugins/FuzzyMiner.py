@@ -2,23 +2,49 @@ import copy
 import os
 import sys
 from datetime import datetime
-import xmltodict
 from json import loads, dumps
+
 import numpy as np
-from abc import ABC, abstractmethod
+import xmltodict
+from PyQt5.QtWidgets import QVBoxLayout
 
 
 class Plugin:
-    def __init__(self, *args, **kwargs):
-        print('Plugin init ("Fuzzy Miner"):', args, kwargs)
-        self.fullpath = args[0]
 
-    def execute(self):
+    def __init__(self, *args, **kwargs):
+        print('Plugin init ("Fuzzy Miner")')
+
+
+    def fill_my_parameters(self, widget: QVBoxLayout):
+        # vBox = QVBoxLayout()
+        # hBox = QHBoxLayout()
+        # first_label = QLabel('name')
+        # vBox.addLayout(hBox, 0)
+        # hBox.addWidget(first_label)
+        # inverted = QCheckBox('Inverted', hBox)
+        # hBox.addWidget(inverted)
+        # active = QCheckBox('Active', hBox)
+        # hBox.addWidget(active)
+        # vBox.addLayout(hBox)
+        # slider = QSlider(Qt.Horizontal)
+        # slider.setRange(0, 1)
+        # vBox.addWidget(slider)
+        # # self.proximity_correlation_binary = self.add_metric( 'proximity_correlation_binary')
+        # widget.addWidget(vBox)
+        # self.endpoint_correlation_binary = self.add_metric( 'endpoint_correlation_binary')
+        # widget.addLayout(self.endpoint_correlation_binary)
+        pass
+
+
+
+    def execute(self, *args, **kwargs):
+        print(f'Executing algorithm with fullpath:{self.fullpath}')
+        self.fullpath = args[0]
         with open(self.fullpath, 'r') as log_file:
             log = log_file.read()
         fm = FuzzyMiner()
         fm.___init___(log, self.fullpath)
-        config = Configuration(FilterConfig(node_filter=NodeFilter(),
+        self.config = Configuration(FilterConfig(node_filter=NodeFilter(),
                                             edge_filter=EdgeFilter(),
                                             concurrency_filter=ConcurrencyFilter()),
                                [MetricConfig(name='proximity_correlation_binary',
@@ -43,7 +69,7 @@ class Plugin:
                                NRootAttenuation(buffer_size=5, num_of_echelons=2.7),
                                maximal_distance=5)
 
-        fm.apply_config(config)
+        fm.apply_config(self.config)
         return "success", fm.full_path
 
 class FuzzyMiner:
