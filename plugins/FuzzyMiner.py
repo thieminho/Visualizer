@@ -6,71 +6,51 @@ from json import loads, dumps
 
 import numpy as np
 import xmltodict
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QLabel
 
 
 class Plugin:
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         print('Plugin init ("Fuzzy Miner")')
 
-
     def fill_my_parameters(self, widget: QVBoxLayout):
-        # vBox = QVBoxLayout()
-        # hBox = QHBoxLayout()
-        # first_label = QLabel('name')
-        # vBox.addLayout(hBox, 0)
-        # hBox.addWidget(first_label)
-        # inverted = QCheckBox('Inverted', hBox)
-        # hBox.addWidget(inverted)
-        # active = QCheckBox('Active', hBox)
-        # hBox.addWidget(active)
-        # vBox.addLayout(hBox)
-        # slider = QSlider(Qt.Horizontal)
-        # slider.setRange(0, 1)
-        # vBox.addWidget(slider)
-        # # self.proximity_correlation_binary = self.add_metric( 'proximity_correlation_binary')
-        # widget.addWidget(vBox)
-        # self.endpoint_correlation_binary = self.add_metric( 'endpoint_correlation_binary')
-        # widget.addLayout(self.endpoint_correlation_binary)
-        pass
-
-
+        widget.addWidget(QLabel('Działam'))
 
     def execute(self, *args, **kwargs):
-        print(f'Executing algorithm with fullpath:{self.fullpath}')
         self.fullpath = args[0]
         with open(self.fullpath, 'r') as log_file:
             log = log_file.read()
         fm = FuzzyMiner()
         fm.___init___(log, self.fullpath)
         self.config = Configuration(FilterConfig(node_filter=NodeFilter(),
-                                            edge_filter=EdgeFilter(),
-                                            concurrency_filter=ConcurrencyFilter()),
-                               [MetricConfig(name='proximity_correlation_binary',
-                                             metric_type='binary'),
-                                MetricConfig(name='endpoint_correlation_binary',
-                                             metric_type='binary'),
-                                MetricConfig(name='originator_correlation_binary',
-                                             metric_type='binary'),
-                                MetricConfig(name='datatype_correlation_binary',
-                                             metric_type='binary'),
-                                MetricConfig(name='datavalue_correlation_binary',
-                                             metric_type='binary'),
-                                MetricConfig(name='routing_significance_unary',
-                                             metric_type='unary'),
-                                MetricConfig(name='distance_significance_binary',
-                                             metric_type='binary'),
-                                MetricConfig(name='frequency_significance_unary',
-                                             metric_type='unary'),
-                                MetricConfig(name='frequency_significance_binary',
-                                             metric_type='binary'),
-                                ],
-                               NRootAttenuation(buffer_size=5, num_of_echelons=2.7),
-                               maximal_distance=5)
+                                                 edge_filter=EdgeFilter(),
+                                                 concurrency_filter=ConcurrencyFilter()),
+                                    [MetricConfig(name='proximity_correlation_binary',
+                                                  metric_type='binary'),
+                                     MetricConfig(name='endpoint_correlation_binary',
+                                                  metric_type='binary'),
+                                     MetricConfig(name='originator_correlation_binary',
+                                                  metric_type='binary'),
+                                     MetricConfig(name='datatype_correlation_binary',
+                                                  metric_type='binary'),
+                                     MetricConfig(name='datavalue_correlation_binary',
+                                                  metric_type='binary'),
+                                     MetricConfig(name='routing_significance_unary',
+                                                  metric_type='unary'),
+                                     MetricConfig(name='distance_significance_binary',
+                                                  metric_type='binary'),
+                                     MetricConfig(name='frequency_significance_unary',
+                                                  metric_type='unary'),
+                                     MetricConfig(name='frequency_significance_binary',
+                                                  metric_type='binary'),
+                                     ],
+                                    NRootAttenuation(buffer_size=5, num_of_echelons=2.7),
+                                    maximal_distance=5)
 
         fm.apply_config(self.config)
         return "success", fm.full_path
+
 
 class FuzzyMiner:
     def ___init___(self, log, path):
@@ -505,7 +485,8 @@ class FuzzyMiner:
                     ref_index = look_back_indices[k]
                     att_factor = self.config.attenuation.get_attenuation_factor(k)
                     # print(self.binary_edge_frequency_values)
-                    print(self.binary_edge_frequency_values[ref_index][follower_index],ref_index,follower_index, att_factor)
+                    print(self.binary_edge_frequency_values[ref_index][follower_index], ref_index, follower_index,
+                          att_factor)
                     self.binary_edge_frequency_values[ref_index][follower_index] += att_factor
                     # print(self.binary_edge_frequency_values[ref_index][follower_index], att_factor, end=' ')
                     if self.metric_settings["proximity_correlation_binary"][0]:
@@ -1243,8 +1224,6 @@ class FuzzyMiner:
         self.node_cluster_mapping[own_idx] = -1
 
 
-
-
 class Node:
     def __init__(self, index, label, significance, node_type="primitive"):
         self.index = index
@@ -1253,7 +1232,8 @@ class Node:
         self.node_type = node_type
 
     def __str__(self):
-        return self.label+" index: "+str(self.index)+" significance: "+str(self.significance)+" and type: "+self.node_type
+        return self.label + " index: " + str(self.index) + " significance: " + str(
+            self.significance) + " and type: " + self.node_type
 
 
 class Edge:
@@ -1265,7 +1245,8 @@ class Edge:
         self.correlation = correlation
 
     def __str__(self):
-        return "source: "+ str(self.source)+" target: "+str(self.target)+" significance: "+str(self.significance)+" correlation: "+str(self.correlation)
+        return "source: " + str(self.source) + " target: " + str(self.target) + " significance: " + str(
+            self.significance) + " correlation: " + str(self.correlation)
 
 
 class Cluster(Node):
@@ -1280,7 +1261,8 @@ class Cluster(Node):
         return self.primitives
 
     def __str__(self):
-        return self.label+" index: "+str(self.index)+" mean significance: "+str(self.significance)+" has primitives: "+str(self.get_primitives())
+        return self.label + " index: " + str(self.index) + " mean significance: " + str(
+            self.significance) + " has primitives: " + str(self.get_primitives())
 
 
 class Filter:
@@ -1316,7 +1298,8 @@ class EdgeFilter(Filter):
                 self.sc_ratio) + " Preserve: " + str(self.preserve) + " Ignore Self Loops: " + str(
                 self.ignore_self_loops) + " Interpret Absolute: " + str(self.interpret_abs)
         else:
-            return super().__str__() + "Edge Transform: " + str(self.edge_transform)+" Ignore Self Loops: " + str(self.ignore_self_loops)
+            return super().__str__() + "Edge Transform: " + str(self.edge_transform) + " Ignore Self Loops: " + str(
+                self.ignore_self_loops)
 
 
 class ConcurrencyFilter(Filter):
@@ -1449,5 +1432,5 @@ class NRootAttenuation(Attenuation):
     def __str__(self):
         return " Echelons Value: " + str(self.echelons)
 
-#test = Plugin()
-#test.execute()
+# test = Plugin()
+# test.execute()

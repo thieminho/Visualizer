@@ -12,6 +12,7 @@ from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QLabel, QFileDialog, QGridLayout, \
     QMessageBox, QVBoxLayout, QListWidget, QApplication
 from visualizer.visualizer import Visualizer
+import timeit
 
 
 class App(QWidget):
@@ -60,7 +61,12 @@ class App(QWidget):
         self.btn = QPushButton('Usuń plik z listy', self)
         self.grid.addWidget(self.btn, 3, 0)
         self.btn.clicked.connect(self.remove_file_from_list)
-
+        self.algorithm_label = QLabel(self)
+        self.algorithm_label.setText('Algorithm time')
+        self.grid.addWidget(self.algorithm_label, 7, 0)
+        self.visualisation_label = QLabel(self)
+        self.visualisation_label.setText('Visualization time')
+        self.grid.addWidget(self.visualisation_label, 8, 0)
         # combobox to choose plugin
         self.combo = QComboBox(self)
         self.combo.setStyleSheet("background-color: #8FAAF7;")
@@ -206,7 +212,11 @@ class App(QWidget):
         else:
 
             self.plugin = self.plugin_module.Plugin()
+            starttime = timeit.default_timer()
             execution = self.plugin.execute(self.filename)
+            endtime = timeit.default_timer()
+            print(f'Algorithm time execution = {endtime-starttime} ms')
+            self.algorithm_label.setText(f'Algorithm time = {endtime-starttime}ms')
             self.result_file = execution[1]
             if execution[0] == "success":
                 self.label.setText("Success, file saved in {}".format(execution[1]))
@@ -222,8 +232,12 @@ class App(QWidget):
             self.grid.setColumnStretch(1, 4)
             self.visualizer.base_color = self.node_color_choice.currentText()
             self.visualizer.base_edge_color = self.edge_color_choice.currentText()
+            starttime = timeit.default_timer()
             self.visualizer.set_graph_to_network(filename=self.result_file)
             self.visualizer.show()
+            endtime = timeit.default_timer()
+            self.visualisation_label.setText(f'Visualisation time = {endtime - starttime} ms')
+            print(f'Visualisation time = {endtime - starttime}ms')
             # self.clearLayout(self.parameters)
             # self.grid.removeItem(self.parameters)
         else:
@@ -235,8 +249,12 @@ class App(QWidget):
             self.setLayout(grid)'''
             self.visualizer.base_color = self.node_color_choice.currentText()
             self.visualizer.base_edge_color = self.edge_color_choice.currentText()
+            starttime = timeit.default_timer()
             self.visualizer.set_graph_to_network(filename=self.result_file)
             self.visualizer.show()
+            endtime = timeit.default_timer()
+            self.visualisation_label.setText(f'Visualisation time = {endtime - starttime} s')
+            print(f'Visualisation time = {endtime - starttime} s')
         self.clearLayout(self.parameters)
         self.grid.removeItem(self.parameters)
         self.button_start.setEnabled(False)
@@ -299,8 +317,6 @@ class ListBoxWidget(QListWidget):
         else:
             event.ignore()
 
-
-mainWindow = None
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -1,6 +1,5 @@
 from datetime import datetime
-
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QLabel
 import pandas as pd
 import os
 
@@ -8,7 +7,6 @@ import os
 class Plugin:
     def __init__(self, *args, **kwargs):
         print('Plugin init ("Heuristic Miner"):', args, kwargs)
-
         self.dependency_threshold = None  # 0.9 (0;1)
         self.positive_observations_threshold = None  # 1 (int >=1)
         self.relative_to_best_threshold = None  # 0.05 (0;1)
@@ -26,6 +24,7 @@ class Plugin:
         self.len2_loop_threshold = 0.9  # 0.9 (0;1]
         self.long_distance_threshold = 0.9  # 0.9 (0;1]
         self.AND_threshold = 0.1  # 0.1 (0;1)
+        widget.addWidget(QLabel('Działam'))
 
         # testing
         """self.dependency_threshold = 0.45
@@ -52,6 +51,8 @@ class Plugin:
         # parameters for now
         self.fill_my_parameters(None)
         print(f'Executing algorithm with fullpath:{self.fullpath}')
+        self.fullpath = args[0]
+        self.df = pd.read_csv(args[0])
         traces = self.get_traces()
         events = self.all_events()
         followage_occurrences = self.cal_foll_occ(traces, events)

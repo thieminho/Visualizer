@@ -50,8 +50,8 @@
         
 
         // parsing and collecting nodes and edges from the python
-        nodes = new vis.DataSet([{"id": "a", "label": "a", "shape": "circular"}, {"id": "b", "label": "b", "shape": "circular"}, {"id": "c", "label": "c", "shape": "circular"}, {"id": "t0", "label": "t0", "shape": "box"}, {"id": "t1", "label": "t1", "shape": "box"}, {"id": "t2", "label": "t2", "shape": "box"}, {"id": "t3", "label": "t3", "shape": "box"}]);
-        edges = new vis.DataSet([{"arrows": "to", "from": "t0", "to": "a"}, {"arrows": "to", "from": "a", "to": "t1"}, {"arrows": "to", "from": "t1", "to": "b"}, {"arrows": "to", "from": "b", "to": "t2"}, {"arrows": "to", "from": "t2", "to": "c"}, {"arrows": "to", "from": "c", "to": "t3"}]);
+        nodes = new vis.DataSet([{"color": "red", "id": "b", "label": "b", "shape": "circular", "title": "0.85"}, {"color": "red", "id": "g", "label": "g", "shape": "circular", "title": "0.85"}, {"color": "red", "id": "i", "label": "i", "shape": "circular", "title": "0.61"}, {"color": "red", "id": "q", "label": "q", "shape": "circular", "title": "0.54"}, {"color": "red", "id": "h", "label": "h", "shape": "circular", "title": "0.54"}, {"color": "red", "id": "e", "label": "e", "shape": "circular", "title": "0.7"}, {"color": "red", "id": "r", "label": "r", "shape": "circular", "title": "0.61"}, {"color": "red", "id": "l", "label": "l", "shape": "circular", "title": "0.53"}, {"color": "red", "id": "m", "label": "m", "shape": "circular", "title": "0.44"}, {"color": "red", "id": "d", "label": "d", "shape": "circular", "title": "0.72"}, {"color": "red", "id": "f", "label": "f", "shape": "circular", "title": "0.75"}, {"color": "red", "id": "p", "label": "p", "shape": "circular", "title": "1.0"}, {"color": "red", "id": "o", "label": "o", "shape": "circular", "title": "0.63"}, {"color": "red", "id": "a", "label": "a", "shape": "circular", "title": "0.29"}, {"color": "red", "id": "j", "label": "j", "shape": "circular", "title": "0.39"}, {"color": "red", "id": "k", "label": "k", "shape": "circular", "title": "0.13"}, {"color": "red", "id": "c", "label": "c", "shape": "circular", "title": "0.69"}, {"color": "red", "id": "n", "label": "n", "shape": "circular", "title": "0.18"}]);
+        edges = new vis.DataSet([{"arrows": "to", "color": "red", "from": "b", "title": "0.6", "to": "g", "width": 2.4}, {"arrows": "to", "color": "red", "from": "g", "title": "0.57", "to": "i", "width": 2.28}, {"arrows": "to", "color": "red", "from": "g", "title": "0.55", "to": "h", "width": 2.2}, {"arrows": "to", "color": "red", "from": "g", "title": "0.82", "to": "e", "width": 3.28}, {"arrows": "to", "color": "red", "from": "i", "title": "0.62", "to": "q", "width": 2.48}, {"arrows": "to", "color": "red", "from": "i", "title": "0.54", "to": "h", "width": 2.16}, {"arrows": "to", "color": "red", "from": "q", "title": "0.64", "to": "r", "width": 2.56}, {"arrows": "to", "color": "red", "from": "h", "title": "0.58", "to": "q", "width": 2.32}, {"arrows": "to", "color": "red", "from": "h", "title": "0.54", "to": "r", "width": 2.16}, {"arrows": "to", "color": "red", "from": "e", "title": "0.59", "to": "i", "width": 2.36}, {"arrows": "to", "color": "red", "from": "e", "title": "0.54", "to": "l", "width": 2.16}, {"arrows": "to", "color": "red", "from": "r", "title": "0.63", "to": "m", "width": 2.52}, {"arrows": "to", "color": "red", "from": "l", "title": "0.48", "to": "m", "width": 1.92}, {"arrows": "to", "color": "red", "from": "m", "title": "0.51", "to": "d", "width": 2.04}, {"arrows": "to", "color": "red", "from": "m", "title": "0.51", "to": "f", "width": 2.04}, {"arrows": "to", "color": "red", "from": "m", "title": "0.47", "to": "o", "width": 1.88}, {"arrows": "to", "color": "red", "from": "d", "title": "1.0", "to": "p", "width": 4.0}, {"arrows": "to", "color": "red", "from": "f", "title": "0.6", "to": "o", "width": 2.4}, {"arrows": "to", "color": "red", "from": "p", "title": "0.12", "to": "a", "width": 0.48}, {"arrows": "to", "color": "red", "from": "o", "title": "0.78", "to": "d", "width": 3.12}, {"arrows": "to", "color": "red", "from": "a", "title": "0.4", "to": "j", "width": 1.6}, {"arrows": "to", "color": "red", "from": "a", "title": "0.52", "to": "k", "width": 2.08}, {"arrows": "to", "color": "red", "from": "j", "title": "0.4", "to": "a", "width": 1.6}, {"arrows": "to", "color": "red", "from": "j", "title": "0.38", "to": "k", "width": 1.52}, {"arrows": "to", "color": "red", "from": "k", "title": "0.17", "to": "b", "width": 0.68}, {"arrows": "to", "color": "red", "from": "k", "title": "0.2", "to": "g", "width": 0.8}, {"arrows": "to", "color": "red", "from": "c", "title": "0.66", "to": "n", "width": 2.64}, {"arrows": "to", "color": "red", "from": "n", "title": "0.14", "to": "e", "width": 0.56}]);
 
         // adding nodes and edges to the graph
         data = {nodes: nodes, edges: edges};
@@ -65,8 +65,8 @@
             "inherit": true
         },
         "smooth": {
-            "enabled": true,
-            "type": "dynamic"
+            "enabled": false,
+            "type": "continuous"
         }
     },
     "interaction": {
@@ -74,9 +74,22 @@
         "hideEdgesOnDrag": false,
         "hideNodesOnDrag": false
     },
+    "layout": {
+        "hierarchical": {
+            "blockShifting": true,
+            "edgeMinimization": true,
+            "enabled": true,
+            "levelSeparation": 150,
+            "parentCentralization": true,
+            "sortMethod": "directed",
+            "treeSpacing": 200
+        },
+        "improvedLayout": true,
+        "randomSeed": 0
+    },
     "manipulation": true,
     "physics": {
-        "enabled": true,
+        "enabled": false,
         "stabilization": {
             "enabled": true,
             "fit": true,
