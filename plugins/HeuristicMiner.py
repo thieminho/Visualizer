@@ -1,7 +1,10 @@
-from datetime import datetime
-from PyQt5.QtWidgets import QVBoxLayout, QLabel
-import pandas as pd
 import os
+from datetime import datetime
+
+import pandas as pd
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QDialog, QDialogButtonBox, QGridLayout, \
+    QCheckBox, QSlider
 
 
 class Plugin:
@@ -14,11 +17,52 @@ class Plugin:
         self.len2_loop_threshold = None  # 0.9 (0;1)
         self.long_distance_threshold = None  # 0.9 (0;1)
         self.AND_threshold = None  # 0.1 (0;1)
+        self.hasParameters = True
+        self.myDialog = self.CustomDialog()
 
-    def fill_my_parameters(self, widget: QVBoxLayout):
-        # parameters, you can bind these
+    class CustomDialog(QDialog):
 
-        widget.addWidget(QLabel('Działam'))
+        def __init__(self, *args, **kwargs):
+            """ TODO: add all metrics and parameters, then merge it into fill_my_params function to set all parameters """
+            super(Plugin.CustomDialog, self).__init__(*args, **kwargs)
+
+            self.setWindowTitle("HELLO!")
+
+            buttons = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+            self.buttonBox = QDialogButtonBox(buttons)
+            self.buttonBox.accepted.connect(self.accept)
+            self.buttonBox.rejected.connect(self.reject)
+
+            self.layout = QVBoxLayout()
+            self.layout.addWidget(self.buttonBox)
+            self.metric1 = Plugin.CustomDialog.MetricGrid()
+            self.layout.addWidget(self.metric1)
+            self.setLayout(self.layout)
+
+        class MetricGrid(QDialog):
+            def __init__(self):
+                super().__init__()
+                grid = QGridLayout()
+                self.label = QLabel('Metric 1')
+                grid.addWidget(self.label, 0, 0)
+                self.active_button = QCheckBox('Active?')
+                grid.addWidget(self.active_button, 0, 1)
+                self.inverted_button = QCheckBox('Inverted?')
+                grid.addWidget(self.inverted_button, 0, 2)
+                self.slider = QSlider(QtCore.Qt.Horizontal)
+                self.slider.setRange(0,100)
+                self.slider.setTickInterval(1)
+                grid.addWidget(self.slider, 1, 0, 3, 1)
+                self.setLayout(grid)
+
+
+
+
+
+
+
+    def fill_my_parameters(self):
 
         # testing
         """self.dependency_threshold = 0.45

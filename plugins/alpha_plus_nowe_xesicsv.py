@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QVBoxLayout
 class Plugin:
     def __init__(self):
         print('Plugin init ("Alpha Plus"):')
+        self.hasParameters = False
 
 
     def fill_my_parameters(self, widget: QVBoxLayout):

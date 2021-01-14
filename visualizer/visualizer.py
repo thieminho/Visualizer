@@ -11,7 +11,7 @@ class Visualizer(QWebEngineView):
         # self.file_name = file_name
         self.font_color = 'white'
         self.background_color = 'white'
-        self.net = Network(height="100%", width="100%", notebook=False, directed=True, font_color=self.font_color,bgcolor=self.background_color)
+        self.net = Network(height="100%", width="100%", heading='Visualizer', notebook=False, directed=True, font_color=self.font_color,bgcolor=self.background_color)
         self.net.set_edge_smooth(smooth_type='dynamic')
 
         self.base_color = 'blue'
@@ -117,6 +117,7 @@ class Visualizer(QWebEngineView):
 
     def show(self) -> None:
         self.net.options.manipulation = True
+
         self.net.save_graph("visuzalized_graph.html")
         self.setHtml(self.net.html)
         super().show()

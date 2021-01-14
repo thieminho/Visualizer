@@ -14,9 +14,10 @@ from PyQt5.QtWidgets import QVBoxLayout
 class Plugin:
     def __init__(self, *args, **kwargs):
         print('Plugin init ("Alpha Miner")')
+        self.hasParameters = False
 
 
-    def fill_my_parameters(self, widget: QVBoxLayout):
+    def fill_my_parameters(self):
         pass
 
     def execute(self, *args, **kwargs):

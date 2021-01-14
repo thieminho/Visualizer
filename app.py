@@ -35,6 +35,7 @@ class App(QWidget):
         self.width = 500
         self.height = 400
         self.init_ui()
+        self.param_dialog = QFileDialog(self)
 
     def init_ui(self):
         # main window
@@ -83,7 +84,7 @@ class App(QWidget):
         # create object of visualizer and add it to window
         self.visualizer = Visualizer()
         self.visualizer.setStyleSheet("background-color: #8FAAF7;")
-        self.grid.addWidget(self.visualizer, 0, 1, -1, -1)
+        self.grid.addWidget(self.visualizer, 0, 1, -1, 1)
         self.grid.setColumnStretch(0, 1)
         self.grid.setColumnStretch(1, 4)
         self.setLayout(self.grid)
@@ -163,12 +164,31 @@ class App(QWidget):
             self.grid.addLayout(self.parameters, 0, 2, 4, 1)
             self.fill_base_parameters()
             # add fill_specific_parameters()
-            plugin.fill_my_parameters(self.parameters)
+            print('Checking alg parameters')
+            if plugin.hasParameters:
+                print('Calling fillmyparameters from first if')
+                self.add_parameters_button.setEnabled(True)
+                self.param_dialog = plugin.myDialog
+                self.add_parameters_button.clicked.connect(self.param_dialog.exec_)
+                #connect add_parameters_button with function fill_my_parameters to show new widget
+                # plugin.fill_my_parameters(self, self.add_parameters_button)
+            else:
+                self.add_parameters_button.setEnabled(False)
         else:
             self.grid.addLayout(self.parameters, 0, 2, 4, 1)
             self.clearLayout(self.parameters)
-            plugin.fill_my_parameters(self.parameters)
             self.fill_base_parameters()
+            print('Checking alg parameters')
+            if plugin.hasParameters:
+                print('Calling fillmyparameters')
+                self.add_parameters_button.setEnabled(True)
+                self.param_dialog = plugin.myDialog
+                # plugin.fill_my_parameters(self)
+                #connect add_parameters_button with function fill_my_parameters to show new widget
+                self.add_parameters_button.clicked.connect(self.param_dialog.exec_)
+                # plugin.fill_my_parameters(self, self.add_parameters_button)
+            else:
+                self.add_parameters_button.setEnabled(False)
         if not self.button_start.isEnabled():
             self.button_start.setEnabled(True)
         print("end")
@@ -263,6 +283,7 @@ class App(QWidget):
         # TODO: Change it to colorPicker
         self.edge_color_choice = QComboBox(self)
         self.node_color_choice = QComboBox(self)
+        self.add_parameters_button = QPushButton('Ustaw Parametry', self)
         node_color_label = QLabel('Choose Node Color:')
         colors = ['red', 'green', 'blue', 'purple', 'black', 'white']
         edge_color_label = QLabel('Choose Edge Color:')
@@ -274,6 +295,8 @@ class App(QWidget):
         self.parameters.addWidget(edge_color_label)
         self.edge_color_choice.addItems(colors)
         self.parameters.addWidget(self.edge_color_choice)
+        self.parameters.addWidget(self.add_parameters_button)
+        self.add_parameters_button.setEnabled(False)
 
     def clearLayout(self, lay):
         while lay.count():

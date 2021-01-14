@@ -13,9 +13,10 @@ class Plugin:
 
     def __init__(self):
         print('Plugin init ("Fuzzy Miner")')
+        self.hasParameters = False
 
-    def fill_my_parameters(self, widget: QVBoxLayout):
-        widget.addWidget(QLabel('Działam'))
+    def fill_my_parameters(self):
+        pass
 
     def execute(self, *args, **kwargs):
         self.fullpath = args[0]
