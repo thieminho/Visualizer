@@ -6,14 +6,115 @@ from json import loads, dumps
 
 import numpy as np
 import xmltodict
-from PyQt5.QtWidgets import QVBoxLayout, QLabel
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QDialog, QDialogButtonBox, QScrollArea, QGridLayout, QCheckBox, \
+    QSlider, QPushButton, QHBoxLayout, QButtonGroup, QRadioButton
 
 
 class Plugin:
 
     def __init__(self):
         print('Plugin init ("Fuzzy Miner")')
-        self.hasParameters = False
+        self.hasParameters = True
+        self.myDialog = self.CustomDialog()
+
+    class CustomDialog(QDialog):
+
+        def __init__(self, *args, **kwargs):
+            """ TODO: add all metrics and parameters, then merge it into fill_my_params function to set all parameters """
+            super(Plugin.CustomDialog, self).__init__(*args, **kwargs)
+            self.resize(400, 500)
+            self.layout = QVBoxLayout()
+            self.setWindowTitle("Parameters")
+
+            self.acc_button = QPushButton('Ok')
+            self.acc_button.clicked.connect(self.close_window)
+            self.cancel_button = QPushButton('Cancel')
+            self.cancel_button.clicked.connect(self.close_cancel)
+            self.buttonBox = QHBoxLayout()
+            self.buttonBox.addWidget(self.acc_button)
+            self.buttonBox.addWidget(self.cancel_button)
+            self.scrollArea = QScrollArea(self)
+            self.scrollArea.setWidgetResizable(True)
+            self.scrollAreaWidgetContents = QDialog()
+            self.vlayout = QVBoxLayout(self.scrollAreaWidgetContents)
+            self.vlayout.setSpacing(0)
+            self.vlayout.setContentsMargins(0, 0, 0, 0)
+            self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+            self.layout.addWidget(self.scrollArea)
+            self.layout.addLayout(self.buttonBox)
+            self.setLayout(self.layout)
+
+            self.metrics = [Plugin.CustomDialog.MetricGrid('proximity_correlation_binary'),
+                            Plugin.CustomDialog.MetricGrid('endpoint_correlation_binary'),
+                            Plugin.CustomDialog.MetricGrid('originator_correlation_binary'),
+                            Plugin.CustomDialog.MetricGrid('datatype_correlation_binary'),
+                            Plugin.CustomDialog.MetricGrid('datavalue_correlation_binary'),
+                            Plugin.CustomDialog.MetricGrid('routing_significance_unary'),
+                            Plugin.CustomDialog.MetricGrid('distance_significance_binary'),
+                            Plugin.CustomDialog.MetricGrid('frequency_significance_unary'),
+                            Plugin.CustomDialog.MetricGrid('frequency_significance_binary')]
+            [self.vlayout.addWidget(metric) for metric in self.metrics]
+            self.edge_filter = self.EdgeFilter()
+            self.vlayout.addWidget(self.edge_filter)
+
+        def close_window(self):
+            print(f'Save Configuration to File and close dialog')
+            self.close()
+
+        def close_cancel(self):
+            self.close()
+
+        class EdgeFilter(QDialog):
+            def __init__(self):
+                super().__init__()
+                vbox = QVBoxLayout()
+                vbox.addWidget(QLabel('Edge Filter'))
+                grid = QGridLayout()
+                vbox.addLayout(grid)
+                self.cut_off_label = QLabel('CutOff')
+                self.cut_off_slider = QSlider(QtCore.Qt.Horizontal)
+                self.cut_off_slider.setRange(0, 100)
+                self.cut_off_acc_val = QLabel('0')
+                self.cut_off_slider.valueChanged.connect(lambda val: self.cut_off_acc_val.setText(str(val/100)))
+                self.utility_label = QLabel('Utility')
+                self.utility_slider = QSlider(QtCore.Qt.Horizontal)
+                self.utility_slider.setRange(0, 100)
+                self.utility_acc_val = QLabel('0')
+                self.utility_slider.valueChanged.connect(lambda val: self.utility_acc_val.setText(str(val/100)))
+                self.buttons = QButtonGroup()
+                self.best_button = QRadioButton('Best edges')
+                self.fuzzy_button = QRadioButton('Fuzzy edges')
+                self.buttons.addButton(self.best_button)
+                self.buttons.addButton(self.fuzzy_button)
+                grid.addWidget(self.best_button,0,0)
+                grid.addWidget(self.fuzzy_button,0, 1)
+                grid.addWidget(self.cut_off_label, 1, 0)
+                grid.addWidget(self.cut_off_acc_val, 1, 1)
+                grid.addWidget(self.cut_off_slider, 2, 0, 1, 2)
+                grid.addWidget(self.utility_label, 3, 0)
+                grid.addWidget(self.utility_acc_val, 3, 1)
+                grid.addWidget(self.utility_slider, 4, 0, 1, 2)
+                self.setLayout(vbox)
+
+        class MetricGrid(QDialog):
+            def __init__(self, name):
+                super().__init__()
+                grid = QGridLayout()
+                self.label = QLabel(name)
+                grid.addWidget(self.label, 0, 0)
+                self.active_button = QCheckBox('Active?')
+                grid.addWidget(self.active_button, 0, 1)
+                self.inverted_button = QCheckBox('Inverted?')
+                grid.addWidget(self.inverted_button, 0, 2)
+                self.acc_val = QLabel('0')
+                self.slider = QSlider(QtCore.Qt.Horizontal)
+                self.slider.setRange(0, 100)
+                self.slider.valueChanged.connect(lambda val: self.acc_val.setText(str(val / 100)))
+                grid.addWidget(self.slider, 1, 0, 1, 2)
+                grid.addWidget(self.acc_val, 1, 2)
+                self.setLayout(grid)
 
     def fill_my_parameters(self):
         pass

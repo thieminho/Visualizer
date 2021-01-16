@@ -62,12 +62,6 @@ class App(QWidget):
         self.btn = QPushButton('Usuń plik z listy', self)
         self.grid.addWidget(self.btn, 3, 0)
         self.btn.clicked.connect(self.remove_file_from_list)
-        self.algorithm_label = QLabel(self)
-        self.algorithm_label.setText('Algorithm time')
-        self.grid.addWidget(self.algorithm_label, 7, 0)
-        self.visualisation_label = QLabel(self)
-        self.visualisation_label.setText('Visualization time')
-        self.grid.addWidget(self.visualisation_label, 8, 0)
         # combobox to choose plugin
         self.combo = QComboBox(self)
         self.combo.setStyleSheet("background-color: #8FAAF7;")
@@ -183,7 +177,6 @@ class App(QWidget):
                 print('Calling fillmyparameters')
                 self.add_parameters_button.setEnabled(True)
                 self.param_dialog = plugin.myDialog
-                # plugin.fill_my_parameters(self)
                 #connect add_parameters_button with function fill_my_parameters to show new widget
                 self.add_parameters_button.clicked.connect(self.param_dialog.exec_)
                 # plugin.fill_my_parameters(self, self.add_parameters_button)
@@ -236,7 +229,6 @@ class App(QWidget):
             execution = self.plugin.execute(self.filename)
             endtime = timeit.default_timer()
             print(f'Algorithm time execution = {endtime-starttime} ms')
-            self.algorithm_label.setText(f'Algorithm time = {endtime-starttime}ms')
             self.result_file = execution[1]
             if execution[0] == "success":
                 self.label.setText("Success, file saved in {}".format(execution[1]))
@@ -256,7 +248,6 @@ class App(QWidget):
             self.visualizer.set_graph_to_network(filename=self.result_file)
             self.visualizer.show()
             endtime = timeit.default_timer()
-            self.visualisation_label.setText(f'Visualisation time = {endtime - starttime} ms')
             print(f'Visualisation time = {endtime - starttime}ms')
             # self.clearLayout(self.parameters)
             # self.grid.removeItem(self.parameters)
@@ -273,7 +264,6 @@ class App(QWidget):
             self.visualizer.set_graph_to_network(filename=self.result_file)
             self.visualizer.show()
             endtime = timeit.default_timer()
-            self.visualisation_label.setText(f'Visualisation time = {endtime - starttime} s')
             print(f'Visualisation time = {endtime - starttime} s')
         self.clearLayout(self.parameters)
         self.grid.removeItem(self.parameters)

@@ -4,7 +4,7 @@ from datetime import datetime
 import pandas as pd
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QDialog, QDialogButtonBox, QGridLayout, \
-    QCheckBox, QSlider
+    QCheckBox, QSlider, QScrollArea, QWidget, QSizePolicy, QPushButton, QButtonGroup, QHBoxLayout
 
 
 class Plugin:
@@ -21,57 +21,98 @@ class Plugin:
         self.myDialog = self.CustomDialog()
 
     class CustomDialog(QDialog):
-
         def __init__(self, *args, **kwargs):
             """ TODO: add all metrics and parameters, then merge it into fill_my_params function to set all parameters """
             super(Plugin.CustomDialog, self).__init__(*args, **kwargs)
-
-            self.setWindowTitle("HELLO!")
-
-            buttons = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-
-            self.buttonBox = QDialogButtonBox(buttons)
-            self.buttonBox.accepted.connect(self.accept)
-            self.buttonBox.rejected.connect(self.reject)
-
+            self.resize(300, 300)
             self.layout = QVBoxLayout()
-            self.layout.addWidget(self.buttonBox)
-            self.metric1 = Plugin.CustomDialog.MetricGrid()
-            self.layout.addWidget(self.metric1)
+            self.setWindowTitle("Parameters")
+            self.acc_button = QPushButton('OK')
+            self.acc_button.clicked.connect(self.close_window)
+            self.buttonBox = QHBoxLayout()
+            self.buttonBox.addWidget(self.acc_button)
+            self.cancel = QPushButton('Cancel')
+            self.buttonBox.addWidget(self.cancel)
+            self.cancel.clicked.connect(self.close_)
+            self.scrollArea = QScrollArea(self)
+            self.scrollArea.setWidgetResizable(True)
+            self.scrollAreaWidgetContents = QDialog()
+            self.vlayout = QVBoxLayout(self.scrollAreaWidgetContents)
+            self.vlayout.setSpacing(0)
+            self.vlayout.setContentsMargins(0, 0, 0, 0)
+            self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+            self.layout.addWidget(self.scrollArea)
+            self.layout.addLayout(self.buttonBox)
             self.setLayout(self.layout)
 
-        class MetricGrid(QDialog):
-            def __init__(self):
+            self.dependency_threshold = self.Dependence("Dependency treshold")  # 0.9 (0;1)
+            self.positive_observations_threshold = None  # 1 (int >=1) ????
+            self.relative_to_best_threshold = self.Dependence('Relative to best threshold')  # 0.05 (0;1)
+            self.len1_loop_threshold = self.Dependence('len1_loop_threshold')  # 0.9 (0;1)
+            self.len2_loop_threshold = self.Dependence('len2_loop_threshold')  # 0.9 (0;1)
+            self.long_distance_threshold = self.Dependence('long_distance_threshold')  # 0.9 (0;1)
+            self.AND_threshold = self.Dependence('AND_threshold')  # 0.1 (0;1)
+            self.vlayout.addWidget(self.dependency_threshold)
+            self.vlayout.addWidget(self.relative_to_best_threshold)
+            self.vlayout.addWidget(self.len1_loop_threshold)
+            self.vlayout.addWidget(self.len2_loop_threshold)
+            self.vlayout.addWidget(self.long_distance_threshold)
+            self.vlayout.addWidget(self.AND_threshold)
+
+        def close_window(self):
+            with open('param_file_hm.txt', 'w') as file:
+                list_to_send = [self.dependency_threshold.slider.value() / 100,
+                                self.relative_to_best_threshold.slider.value() / 100,
+                                self.len1_loop_threshold.slider.value() / 100,
+                                self.len2_loop_threshold.slider.value() / 100,
+                                self.long_distance_threshold.slider.value() / 100,
+                                self.AND_threshold.slider.value() / 100]
+                [file.write(str(param) + '\n') for param in list_to_send]
+            self.close()
+
+        def close_(self):
+            self.close()
+
+        class Dependence(QDialog):
+            def __init__(self, name):
                 super().__init__()
                 grid = QGridLayout()
-                self.label = QLabel('Metric 1')
-                grid.addWidget(self.label, 0, 0)
-                self.active_button = QCheckBox('Active?')
-                grid.addWidget(self.active_button, 0, 1)
-                self.inverted_button = QCheckBox('Inverted?')
-                grid.addWidget(self.inverted_button, 0, 2)
+                self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
+                grid.setSpacing(5)
+                self.label = QLabel(name)
+                self.label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
                 self.slider = QSlider(QtCore.Qt.Horizontal)
-                self.slider.setRange(0,100)
-                self.slider.setTickInterval(1)
-                grid.addWidget(self.slider, 1, 0, 3, 1)
+                self.slider.setRange(0, 100)
+                self.slider.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Maximum)
+                self.acc_val = QLabel('0')
+                self.acc_val.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                self.slider.valueChanged.connect(lambda val: self.acc_val.setText(str(val / 100)))
+                grid.addWidget(self.label, 0, 0)
+                grid.addWidget(self.acc_val, 0, 1)
+                grid.addWidget(self.slider, 1, 0, 1, 2)
                 self.setLayout(grid)
 
-
-
-
-
-
-
     def fill_my_parameters(self):
+        with open('param_file_hm.txt', 'r') as file:
+            params = file.read().split()
+            [print(p) for p in params]
+            self.dependency_threshold = float(params[0])
+            self.relative_to_best_threshold = float(params[1])
+            self.len1_loop_threshold = float(params[2])
+            self.len2_loop_threshold = float(params[3])
+            self.long_distance_threshold = float(params[4])
+            self.AND_threshold = float(params[5])
+        if os.path.exists('../param_file_hm.txt'):
+            try:
+                os.remove('../params_file_hm.txt')
+            except OSError as e:
+                print(f'Failed with: {e.strerror}')
+        else:
+            print('Did not find path')
 
-        # testing
-        """self.dependency_threshold = 0.45
-        self.positive_observations_threshold = 1
-        self.relative_to_best_threshold = 0.4"""
 
     # Assumes fill_my_parameters was already called, if not add it in the first line
     def execute(self, *args, **kwargs):
-        # for now
         self.dependency_threshold = 0.9  # 0.9 (0;1]
         self.positive_observations_threshold = 1  # 1 (int >=1)
         self.relative_to_best_threshold = 0.05  # 0.05 (0;1]
@@ -79,6 +120,11 @@ class Plugin:
         self.len2_loop_threshold = 0.9  # 0.9 (0;1]
         self.long_distance_threshold = 0.9  # 0.9 (0;1]
         self.AND_threshold = 0.1  # 0.1 (0;1)
+        self.fill_my_parameters()
+        print('===================\n')
+        print(self.dependency_threshold, self.relative_to_best_threshold,
+              self.len1_loop_threshold, self.len2_loop_threshold,
+              self.long_distance_threshold, self.AND_threshold)
 
         self.fullpath = args[0]
         self.df = pd.read_csv(args[0])
@@ -128,7 +174,6 @@ class Plugin:
         petri_net = self.causal_matrix_to_petri_net(causal_matrix, events)
         print(petri_net)
         file_name = self.petri_net_to_csv(petri_net)
-        
 
         # causal_matrix = self.long_distance(...)
         # petri_net_in_csv = self.to_petri_net(causal_matrix)
@@ -302,7 +347,7 @@ class Plugin:
         for event_1, event_2 in loops2:
             if event_1 == event_a:
                 event_b = event_2
-        for event, dependency_value_a, _, dependency_value_b\
+        for event, dependency_value_a, _, dependency_value_b \
                 in zip(depend_matrix[event_a].items(), depend_matrix[event_b].items()):
             if event_a == event or event_b == event:
                 continue
@@ -423,11 +468,11 @@ class Plugin:
         return causal_matrix
 
     def cal_and_relation_successor(self, event_a, event_b, event_c, follow_occs):
-        return (follow_occs[event_b][event_c] + follow_occs[event_c][event_b]) /\
+        return (follow_occs[event_b][event_c] + follow_occs[event_c][event_b]) / \
                (follow_occs[event_a][event_b] + follow_occs[event_a][event_c] + 1)
 
     def cal_and_relation_predecessor(self, event_a, event_b, event_c, follow_occs):
-        return (follow_occs[event_b][event_c] + follow_occs[event_c][event_b]) /\
+        return (follow_occs[event_b][event_c] + follow_occs[event_c][event_b]) / \
                (follow_occs[event_b][event_a] + follow_occs[event_c][event_a] + 1)
 
     def causal_matrix_to_petri_net(self, causal_matrix, events):
