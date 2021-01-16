@@ -116,6 +116,21 @@ class Plugin:
                 grid.addWidget(self.acc_val, 1, 2)
                 self.setLayout(grid)
 
+        class AttenuationGrid(QDialog):
+            def __init__(self):
+                super().__init__()
+                grid = QGridLayout()
+                self.label = QLabel('Maximal event distance')
+                self.max_ev_dis = QSlider()
+                self.max_ev_dis.setRange(0,100)
+                self.max_ev_dis_acc_val = QLabel('0')
+                self.max_ev_dis.valueChanged.connect(lambda val: self.max_ev_dis_acc_val.setText(str(val/100)))
+                self.second_label = QLabel('Select attenuation to use:')
+                self.buttonbox = QButtonGroup()
+                self.nth_root = QRadioButton('Nth root with radical')
+                self.linear_attenuation = QRadioButton('Linear attenuation')
+                
+
     def fill_my_parameters(self):
         pass
 
