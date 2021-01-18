@@ -297,6 +297,10 @@ class Plugin:
         self.initial_activity = initial_activity
         end_activity = self.find_end_activity(depend_matrix)
         self.end_activity = end_activity
+        depend_graph[end_activity] = set()
+        for event in events:
+            if initial_activity in depend_graph[event]:
+                depend_graph[event].remove(initial_activity)
         for event in events:
             if event != end_activity and not (event, end_activity) in loops2:
                 if self.in_2loop(event, loops2):
@@ -312,6 +316,10 @@ class Plugin:
                 else:
                     s = self.find_best_predecessor(event, depend_matrix)
                     depend_graph[s].add(event)
+        depend_graph[end_activity] = set()
+        for event in events:
+            if initial_activity in depend_graph[event]:
+                depend_graph[event].remove(initial_activity)
         return depend_graph
 
     def find_inital_activity(self, depend_matrix):
@@ -351,7 +359,7 @@ class Plugin:
     def find_best_successor(self, event, depend_matrix):
         maximium = -2
         for event_a, dependency_value in depend_matrix[event].items():
-            if event_a == event:
+            if event_a == event or event_a == self.initial_activity:
                 continue
             if maximium < dependency_value:
                 maximium = dependency_value
@@ -367,7 +375,7 @@ class Plugin:
                 event_b = event_2
         for event, dependency_value_a, _, dependency_value_b \
                 in zip(depend_matrix[event_a].items(), depend_matrix[event_b].items()):
-            if event_a == event or event_b == event:
+            if event_a == event or event_b == event or event == self.initial_activity:
                 continue
             dependency_value = (dependency_value_a + dependency_value_b) / 2
             if maximium < dependency_value:
@@ -380,7 +388,7 @@ class Plugin:
         maximum = -2
         for event_a, dependecies in depend_matrix.items():
             dependency_value = dependecies[event]
-            if event_a == event:
+            if event_a == event or event_a == self.end_activity:
                 continue
             if maximum < dependency_value:
                 maximum = dependency_value
@@ -395,7 +403,7 @@ class Plugin:
             if event_1 == event_a:
                 event_b = event_2
         for event, dependecies in depend_matrix.items():
-            if event_a == event or event_b == event:
+            if event_a == event or event_b == event or event == self.end_activity:
                 continue
             dependency_value = (dependecies[event_a] + dependecies[event_b]) / 2
             if maximum < dependency_value:
@@ -520,7 +528,7 @@ class Plugin:
     def escape_to_end_possible(self, event_x, event_y, visited_s, events, causal_matrix):
         if (event_x in visited_s) or (event_x == event_y) or (event_y == self.end_activity):
             return False
-        if event_x == self.end_activity: # (Card(OutOrCluster[1], N_events) = 0) # ??? TODO // X is eEe event, I think it means end activity
+        if event_x == self.end_activity:
             return True
         for ors_i in causal_matrix:
             or_set_escape_possible = False
