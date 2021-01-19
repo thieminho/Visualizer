@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import datetime
 
 import pandas as pd
@@ -51,8 +52,8 @@ class Plugin:
             self.setLayout(self.layout)
 
             self.dependency_threshold = self.Dependence("Dependency treshold")  # 0.9 (0;1)
-            self.positive_observations_threshold = QLineEdit()  # 1 (int >=1) ????
-            self.onlyInt = QIntValidator()
+            self.positive_observations_threshold = QLineEdit('1')  # 1 (int >=1) ????
+            self.onlyInt = QIntValidator(1,sys.maxsize)
             self.positive_observations_threshold.setValidator(self.onlyInt)
             self.relative_to_best_threshold = self.Dependence('Relative to best threshold')  # 0.05 (0;1)
             self.len1_loop_threshold = self.Dependence('len1_loop_threshold')  # 0.9 (0;1)
@@ -68,7 +69,8 @@ class Plugin:
             self.vlayout.addWidget(self.AND_threshold)
 
         def close_window(self):
-            with open('param_file_hm.txt', 'w') as file:
+            os.makedirs(os.path.dirname('Parameters/param_file_hm.txt'), exist_ok=True)
+            with open('Parameters/param_file_hm.txt', 'w') as file:
                 list_to_send = [self.dependency_threshold.slider.value() / 100,
                                 self.positive_observations_threshold.text(),
                                 self.relative_to_best_threshold.slider.value() / 100,
@@ -80,6 +82,9 @@ class Plugin:
             self.close()
 
         def close_(self):
+            os.makedirs(os.path.dirname('Parameters/param_file_hm.txt'), exist_ok=True)
+            with open('Parameters/param_file_hm.txt', 'w') as file:
+                file.write('default')
             self.close()
 
         class Dependence(QDialog):
@@ -102,19 +107,26 @@ class Plugin:
                 self.setLayout(grid)
 
     def fill_my_parameters(self):
-        with open('param_file_hm.txt', 'r') as file:
-            params = file.read().split()
-            [print(p) for p in params]
-            self.dependency_threshold = float(params[0])
-            self.positive_observations_threshold = int(params[1])
-            self.relative_to_best_threshold = float(params[2])
-            self.len1_loop_threshold = float(params[3])
-            self.len2_loop_threshold = float(params[4])
-            self.long_distance_threshold = float(params[5])
-            self.AND_threshold = float(params[6])
-        if os.path.exists('../param_file_hm.txt'):
+        print('fill_my_parameters: called')
+        try:
+            with open('Parameters/param_file_hm.txt', 'r') as file:
+                params = file.read().split()
+                if params[0] == 'default':
+                    print('Default parameters')
+                    pass
+                else:
+                    self.dependency_threshold = float(params[0])
+                    self.positive_observations_threshold = int(params[1])
+                    self.relative_to_best_threshold = float(params[2])
+                    self.len1_loop_threshold = float(params[3])
+                    self.len2_loop_threshold = float(params[4])
+                    self.long_distance_threshold = float(params[5])
+                    self.AND_threshold = float(params[6])
+        except IOError:
+            print('File don\'t exists')
+        if os.path.isfile('Parameters/param_file_hm.txt'):
             try:
-                os.remove('../params_file_hm.txt')
+                os.remove('Parameters/param_file_hm.txt')
             except OSError as e:
                 print(f'Failed with: {e.strerror}')
         else:
@@ -130,10 +142,9 @@ class Plugin:
         self.len2_loop_threshold = 0.9  # 0.9 (0;1]
         self.long_distance_threshold = 0.9  # 0.9 (0;1]
         self.AND_threshold = 0.1  # 0.1 (0;1)
-        if os.path.exists('../params_file_hm.txt'):
-            self.fill_my_parameters()
+        self.fill_my_parameters()
         print('===================\n')
-        print(self.dependency_threshold, self.relative_to_best_threshold,
+        print(self.dependency_threshold,self.positive_observations_threshold, self.relative_to_best_threshold,
               self.len1_loop_threshold, self.len2_loop_threshold,
               self.long_distance_threshold, self.AND_threshold)
         print(args)

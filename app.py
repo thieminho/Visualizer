@@ -164,8 +164,7 @@ class App(QWidget):
                 self.add_parameters_button.setEnabled(True)
                 self.param_dialog = plugin.myDialog
                 self.add_parameters_button.clicked.connect(self.param_dialog.exec_)
-                #connect add_parameters_button with function fill_my_parameters to show new widget
-                # plugin.fill_my_parameters(self, self.add_parameters_button)
+
             else:
                 self.add_parameters_button.setEnabled(False)
         else:
@@ -177,9 +176,7 @@ class App(QWidget):
                 print('Calling fillmyparameters')
                 self.add_parameters_button.setEnabled(True)
                 self.param_dialog = plugin.myDialog
-                #connect add_parameters_button with function fill_my_parameters to show new widget
                 self.add_parameters_button.clicked.connect(self.param_dialog.exec_)
-                # plugin.fill_my_parameters(self, self.add_parameters_button)
             else:
                 self.add_parameters_button.setEnabled(False)
         if not self.button_start.isEnabled():

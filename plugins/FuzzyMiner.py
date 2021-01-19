@@ -7,7 +7,7 @@ from json import loads, dumps
 import numpy as np
 import xmltodict
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QDialog, QDialogButtonBox, QScrollArea, QGridLayout, QCheckBox, \
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QDialog, QScrollArea, QGridLayout, QCheckBox, \
     QSlider, QPushButton, QHBoxLayout, QButtonGroup, QRadioButton
 
 
@@ -21,7 +21,6 @@ class Plugin:
     class CustomDialog(QDialog):
 
         def __init__(self, *args, **kwargs):
-            """ TODO: add all metrics and parameters, then merge it into fill_my_params function to set all parameters """
             super(Plugin.CustomDialog, self).__init__(*args, **kwargs)
             self.resize(400, 500)
             self.layout = QVBoxLayout()
@@ -55,16 +54,82 @@ class Plugin:
                             Plugin.CustomDialog.MetricGrid('distance_significance_binary'),
                             Plugin.CustomDialog.MetricGrid('frequency_significance_unary'),
                             Plugin.CustomDialog.MetricGrid('frequency_significance_binary')]
+            # add metric widgets
             [self.vlayout.addWidget(metric) for metric in self.metrics]
+            # add edge filter widget
             self.edge_filter = self.EdgeFilter()
             self.vlayout.addWidget(self.edge_filter)
+            # add attenuation widget
+            self.attenuation_filter = self.AttenuationGrid()
+            self.vlayout.addWidget(self.attenuation_filter)
+            # add Node filter widget
+            hbox = QHBoxLayout()
+            self.node_sig_cutoff_slider = QSlider()
+            self.node_sig_cutoff_slider.setRange(0, 100)
+            self.acc_sig_cutoff_val = QLabel('0')
+            self.node_sig_cutoff_slider.valueChanged.connect(
+                lambda val: self.acc_sig_cutoff_val.setText(str(val / 100)))
+            self.vlayout.addLayout(hbox)
+            # add concurency filter
+            self.concurency_filter = self.ConcurencyFilter()
+            self.vlayout.addWidget(self.concurency_filter)
 
         def close_window(self):
             print(f'Save Configuration to File and close dialog')
+            os.makedirs(os.path.dirname('Parameters/param_file_fm.txt'), exist_ok=True)
+            with open('Parameters/param_file_fm.txt', 'w') as file:
+                # add node filter
+                file.write(self.acc_sig_cutoff_val.text() + '\n')
+                # add edge filter
+                fuzzy_or_best = self.edge_filter.fuzzy_button.isChecked()
+                file.write(f'{str(int(fuzzy_or_best))} {str(self.edge_filter.cut_off_acc_val.text())} '
+                           f'{str(self.edge_filter.utility_acc_val.text())}\n')
+                # add concurency filter
+                is_concurency = self.concurency_filter.fiter_concurecy.isChecked()
+                file.write(f'{str(int(is_concurency))} {str(self.concurency_filter.preserve_slider.value()/100)} '
+                           f'{str(self.concurency_filter.ratio_slider.value()/100)}\n')
+                # add attenuation
+                is_nthroot = self.attenuation_filter.nth_root.isChecked()
+                file.write(f'{str(int(is_nthroot))} {self.attenuation_filter.nth_label.text()} '
+                           f'{self.attenuation_filter.max_ev_dis_acc_val.text()}\n')
+                # add metrics to file
+                for metric in self.metrics:
+                    file.write(
+                        f'{metric.acc_val.text()} {str(int(metric.inverted_button.isChecked()))} {str(int(metric.active_button.isChecked()))}' + ';')
+
+
             self.close()
 
         def close_cancel(self):
+            os.makedirs(os.path.dirname('Parameters/param_file_fm.txt'), exist_ok=True)
+            with open('Parameters/param_file_fm.txt', 'w') as file:
+                file.write('default')
             self.close()
+
+        class ConcurencyFilter(QDialog):
+            def __init__(self):
+                super().__init__()
+                vbox = QVBoxLayout()
+                vbox.addWidget(QLabel('Concurency Filter'))
+                self.fiter_concurecy = QCheckBox('Filter concurency')
+                vbox.addWidget(self.fiter_concurecy)
+                preserve_box = QHBoxLayout()
+                acc_p_val = QLabel('0')
+                self.preserve_slider = QSlider(QtCore.Qt.Horizontal)
+                self.preserve_slider.setRange(0, 100)
+                self.preserve_slider.valueChanged.connect(lambda val: acc_p_val.setText(str(val / 100)))
+                preserve_box.addWidget(self.preserve_slider)
+                preserve_box.addWidget(acc_p_val)
+                vbox.addLayout(preserve_box)
+                ratio_box = QHBoxLayout()
+                acc_r_val = QLabel('0')
+                self.ratio_slider = QSlider(QtCore.Qt.Horizontal)
+                self.ratio_slider.setRange(0, 100)
+                self.ratio_slider.valueChanged.connect(lambda val: acc_r_val.setText(str(val / 100)))
+                ratio_box.addWidget(self.ratio_slider)
+                ratio_box.addWidget(acc_r_val)
+                vbox.addLayout(ratio_box)
+                self.setLayout(vbox)
 
         class EdgeFilter(QDialog):
             def __init__(self):
@@ -77,19 +142,19 @@ class Plugin:
                 self.cut_off_slider = QSlider(QtCore.Qt.Horizontal)
                 self.cut_off_slider.setRange(0, 100)
                 self.cut_off_acc_val = QLabel('0')
-                self.cut_off_slider.valueChanged.connect(lambda val: self.cut_off_acc_val.setText(str(val/100)))
+                self.cut_off_slider.valueChanged.connect(lambda val: self.cut_off_acc_val.setText(str(val / 100)))
                 self.utility_label = QLabel('Utility')
                 self.utility_slider = QSlider(QtCore.Qt.Horizontal)
                 self.utility_slider.setRange(0, 100)
                 self.utility_acc_val = QLabel('0')
-                self.utility_slider.valueChanged.connect(lambda val: self.utility_acc_val.setText(str(val/100)))
+                self.utility_slider.valueChanged.connect(lambda val: self.utility_acc_val.setText(str(val / 100)))
                 self.buttons = QButtonGroup()
                 self.best_button = QRadioButton('Best edges')
                 self.fuzzy_button = QRadioButton('Fuzzy edges')
                 self.buttons.addButton(self.best_button)
                 self.buttons.addButton(self.fuzzy_button)
-                grid.addWidget(self.best_button,0,0)
-                grid.addWidget(self.fuzzy_button,0, 1)
+                grid.addWidget(self.best_button, 0, 0)
+                grid.addWidget(self.fuzzy_button, 0, 1)
                 grid.addWidget(self.cut_off_label, 1, 0)
                 grid.addWidget(self.cut_off_acc_val, 1, 1)
                 grid.addWidget(self.cut_off_slider, 2, 0, 1, 2)
@@ -105,8 +170,10 @@ class Plugin:
                 self.label = QLabel(name)
                 grid.addWidget(self.label, 0, 0)
                 self.active_button = QCheckBox('Active?')
+                self.active_button.setChecked(True)
                 grid.addWidget(self.active_button, 0, 1)
                 self.inverted_button = QCheckBox('Inverted?')
+                self.inverted_button.setChecked(False)
                 grid.addWidget(self.inverted_button, 0, 2)
                 self.acc_val = QLabel('0')
                 self.slider = QSlider(QtCore.Qt.Horizontal)
@@ -121,17 +188,63 @@ class Plugin:
                 super().__init__()
                 grid = QGridLayout()
                 self.label = QLabel('Maximal event distance')
-                self.max_ev_dis = QSlider()
-                self.max_ev_dis.setRange(0,100)
+                self.max_ev_dis = QSlider(QtCore.Qt.Horizontal)
+                self.max_ev_dis.setRange(0, 100)
                 self.max_ev_dis_acc_val = QLabel('0')
-                self.max_ev_dis.valueChanged.connect(lambda val: self.max_ev_dis_acc_val.setText(str(val/100)))
+                self.max_ev_dis.valueChanged.connect(lambda val: self.max_ev_dis_acc_val.setText(str(val)))
                 self.second_label = QLabel('Select attenuation to use:')
                 self.buttonbox = QButtonGroup()
                 self.nth_root = QRadioButton('Nth root with radical')
                 self.linear_attenuation = QRadioButton('Linear attenuation')
-                
+                self.nth_root_slider = QSlider(QtCore.Qt.Horizontal)
+                self.nth_root_slider.setRange(0, 100)
+                self.nth_label = QLabel('0')
+                self.nth_root_slider.valueChanged.connect(lambda val: self.nth_label.setText(str(val / 10)))
+
+                grid.addWidget(QLabel('Attenuation'), 0, 0)
+                grid.addWidget(self.label, 1, 0)
+                grid.addWidget(self.max_ev_dis_acc_val, 1, 1)
+                grid.addWidget(self.max_ev_dis, 2, 1, 1, 2)
+                grid.addWidget(self.second_label,3,0)
+                grid.addWidget(self.nth_root, 4, 1)
+                grid.addWidget(self.linear_attenuation, 4, 0)
+                grid.addWidget(self.nth_root_slider,5,0,1,2)
+
+                self.setLayout(grid)
 
     def fill_my_parameters(self):
+        try:
+            with open('Parameters/param_file_fm.txt', 'r') as file:
+                params = file.read().split('\n')
+                node_filter = NodeFilter(cut_off=int(params[0]))
+                edge_params = params[1].split(' ')
+                edge_filter = EdgeFilter(edge_transform=int(edge_params[0]),
+                                         sc_ratio=float(edge_params[1]),
+                                         preserve=float(edge_params[2]))
+                conc_params = params[2].split(' ')
+                concurrency_filter = ConcurrencyFilter(filter_concurrency=bool(conc_params[0]),
+                                                       preserve=float(conc_params[1]),
+                                                       offset=float(conc_params[2]))
+                attenuation_params = params[3].split(' ')
+                attenuation_filter = None
+                if attenuation_params[0] == '0':
+                    attenuation_filter = LinearAttenuation(buffer_size=int(attenuation_params[2]),
+                                                           num_of_echelons=float(attenuation_params[1]))
+                else:
+                   attenuation_filter = NRootAttenuation(buffer_size=int(attenuation_params[2]),
+                                                           num_of_echelons=float(attenuation_params[1]))
+                metrics = params[4].split(';')
+                metrics = metrics[:-1]
+                print(metrics)
+        except IOError:
+            print('File don\'t exists')
+        if os.path.isfile('Parameters/param_file_fm.txt'):
+            try:
+                os.remove('Parameters/param_file_fm.txt')
+            except OSError as e:
+                print(f'Failed with: {e.strerror}')
+        else:
+            print('Did not find path')
         pass
 
     def execute(self, *args, **kwargs):
@@ -164,7 +277,7 @@ class Plugin:
                                      ],
                                     NRootAttenuation(buffer_size=5, num_of_echelons=2.7),
                                     maximal_distance=5)
-
+        self.fill_my_parameters()
         fm.apply_config(self.config)
         return "success", fm.full_path
 
@@ -1548,6 +1661,3 @@ class NRootAttenuation(Attenuation):
 
     def __str__(self):
         return " Echelons Value: " + str(self.echelons)
-
-# test = Plugin()
-# test.execute()
