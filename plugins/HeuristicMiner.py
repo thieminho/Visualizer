@@ -3,8 +3,9 @@ from datetime import datetime
 
 import pandas as pd
 from PyQt5 import QtCore
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QDialog, QDialogButtonBox, QGridLayout, \
-    QCheckBox, QSlider, QScrollArea, QWidget, QSizePolicy, QPushButton, QButtonGroup, QHBoxLayout
+    QCheckBox, QSlider, QScrollArea, QWidget, QSizePolicy, QPushButton, QButtonGroup, QHBoxLayout, QLineEdit
 
 
 class Plugin:
@@ -22,7 +23,6 @@ class Plugin:
 
     class CustomDialog(QDialog):
         def __init__(self, *args, **kwargs):
-            """ TODO: add all metrics and parameters, then merge it into fill_my_params function to set all parameters """
             super(Plugin.CustomDialog, self).__init__(*args, **kwargs)
             self.resize(300, 300)
             self.layout = QVBoxLayout()
@@ -46,13 +46,16 @@ class Plugin:
             self.setLayout(self.layout)
 
             self.dependency_threshold = self.Dependence("Dependency treshold")  # 0.9 (0;1)
-            self.positive_observations_threshold = None  # 1 (int >=1) ????
+            self.positive_observations_threshold = QLineEdit()  # 1 (int >=1) ????
+            self.onlyInt = QIntValidator()
+            self.positive_observations_threshold.setValidator(self.onlyInt)
             self.relative_to_best_threshold = self.Dependence('Relative to best threshold')  # 0.05 (0;1)
             self.len1_loop_threshold = self.Dependence('len1_loop_threshold')  # 0.9 (0;1)
             self.len2_loop_threshold = self.Dependence('len2_loop_threshold')  # 0.9 (0;1)
             self.long_distance_threshold = self.Dependence('long_distance_threshold')  # 0.9 (0;1)
             self.AND_threshold = self.Dependence('AND_threshold')  # 0.1 (0;1)
             self.vlayout.addWidget(self.dependency_threshold)
+            self.vlayout.addWidget(self.positive_observations_threshold)
             self.vlayout.addWidget(self.relative_to_best_threshold)
             self.vlayout.addWidget(self.len1_loop_threshold)
             self.vlayout.addWidget(self.len2_loop_threshold)
@@ -62,6 +65,7 @@ class Plugin:
         def close_window(self):
             with open('param_file_hm.txt', 'w') as file:
                 list_to_send = [self.dependency_threshold.slider.value() / 100,
+                                self.positive_observations_threshold.text(),
                                 self.relative_to_best_threshold.slider.value() / 100,
                                 self.len1_loop_threshold.slider.value() / 100,
                                 self.len2_loop_threshold.slider.value() / 100,
@@ -97,11 +101,12 @@ class Plugin:
             params = file.read().split()
             [print(p) for p in params]
             self.dependency_threshold = float(params[0])
-            self.relative_to_best_threshold = float(params[1])
-            self.len1_loop_threshold = float(params[2])
-            self.len2_loop_threshold = float(params[3])
-            self.long_distance_threshold = float(params[4])
-            self.AND_threshold = float(params[5])
+            self.positive_observations_threshold = int(params[1])
+            self.relative_to_best_threshold = float(params[2])
+            self.len1_loop_threshold = float(params[3])
+            self.len2_loop_threshold = float(params[4])
+            self.long_distance_threshold = float(params[5])
+            self.AND_threshold = float(params[6])
         if os.path.exists('../param_file_hm.txt'):
             try:
                 os.remove('../params_file_hm.txt')
@@ -120,7 +125,8 @@ class Plugin:
         self.len2_loop_threshold = 0.9  # 0.9 (0;1]
         self.long_distance_threshold = 0.9  # 0.9 (0;1]
         self.AND_threshold = 0.1  # 0.1 (0;1)
-        self.fill_my_parameters()
+        if os.path.exists('../params_file_hm.txt'):
+            self.fill_my_parameters()
         print('===================\n')
         print(self.dependency_threshold, self.relative_to_best_threshold,
               self.len1_loop_threshold, self.len2_loop_threshold,
