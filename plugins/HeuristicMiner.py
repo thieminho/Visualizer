@@ -549,12 +549,11 @@ class Plugin:
             return True
         for ors_i in causal_matrix:
             or_set_escape_possible = False
-            for e_j in events:
-                if e_j in ors_i:
-                    visited_s.add(event_x)
-                    if self.escape_to_end_possible(e_j, event_y, visited_s, events, causal_matrix):
-                        or_set_escape_possible = True
-                    visited_s.remove(event_x)
+            for e_j in ors_i:
+                visited_s.add(event_x)
+                if self.escape_to_end_possible(e_j, event_y, visited_s, events, causal_matrix):
+                    or_set_escape_possible = True
+                visited_s.remove(event_x)
             if not or_set_escape_possible:
                 return False
         return True

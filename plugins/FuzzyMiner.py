@@ -3,7 +3,7 @@ import os
 import sys
 from datetime import datetime
 from json import loads, dumps
-
+from Levenshtein import distance
 import numpy as np
 import xmltodict
 from PyQt5 import QtCore
@@ -1073,7 +1073,7 @@ class FuzzyMiner:
     def cal_endpoint_correlation(self, evt1, evt2):
         first_name = evt1['concept:name'] if 'concept:name' in evt1 else "<no name>"
         second_name = evt2['concept:name'] if 'concept:name' in evt2 else "<no name>"
-        dist = self.levenshtein_ratio_and_distance(str(first_name), str(second_name))
+        dist = distance(str(first_name), str(second_name))
         big_str_len = max(len(str(first_name)), len(str(second_name)))
         if big_str_len == 0:
             return 1.0
@@ -1083,7 +1083,7 @@ class FuzzyMiner:
     def cal_originator_correlation(self, evt1, evt2):
         first_resource = evt1['org:resource'] if 'org:resource' in evt1 else "<no resource>"
         second_resource = evt2['org:resource'] if 'org:resource' in evt2 else "<no resource>"
-        dist = self.levenshtein_ratio_and_distance(str(first_resource), str(second_resource))
+        dist = distance(str(first_resource), str(second_resource))
         big_str_len = max(len(first_resource), len(second_resource))
         if big_str_len == 0:
             return 1.0
@@ -1128,7 +1128,7 @@ class FuzzyMiner:
         for key in ref_data_keys:
             if key in fol_data_keys:
                 key_overlap += 1
-                dist = self.levenshtein_ratio_and_distance(str(evt1[key]), str(evt2[key]))
+                dist = self.distance(str(evt1[key]), str(evt2[key]))
                 big_str_len = max(len(str(evt1[key])), len(str(evt2[key])))
                 if big_str_len == 0:
                     val_overlap += 1.0
@@ -1175,29 +1175,6 @@ class FuzzyMiner:
             return True
         else:
             return False
-
-    def levenshtein_ratio_and_distance(self, s, t):
-        rows = len(s) + 1
-        cols = len(t) + 1
-        distance = np.zeros((rows, cols), dtype=int)
-
-        for i in range(1, rows):
-            for k in range(1, cols):
-                distance[i][0] = i
-                distance[0][k] = k
-
-        for col in range(1, cols):
-            for row in range(1, rows):
-                if s[row - 1] == t[col - 1]:
-                    cost = 0
-                else:
-                    cost = 2
-                distance[row][col] = min(distance[row - 1][col] + 1,
-                                         distance[row][col - 1] + 1,
-                                         distance[row - 1][col - 1] + cost)
-
-        ratio = ((len(s) + len(t)) - distance[row][col]) / (len(s) + len(t))
-        return ratio
 
     def clusterize(self):
         self.node_cluster_mapping = [i for i in range(0, self.num_of_nodes)]
