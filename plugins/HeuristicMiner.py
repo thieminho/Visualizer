@@ -53,7 +53,7 @@ class Plugin:
 
             self.dependency_threshold = self.Dependence("Dependency treshold")  # 0.9 (0;1)
             self.positive_observations_threshold = QLineEdit('1')  # 1 (int >=1) ????
-            self.onlyInt = QIntValidator(1,sys.maxsize)
+            self.onlyInt = QIntValidator(1,1000)
             self.positive_observations_threshold.setValidator(self.onlyInt)
             self.relative_to_best_threshold = self.Dependence('Relative to best threshold')  # 0.05 (0;1)
             self.len1_loop_threshold = self.Dependence('len1_loop_threshold')  # 0.9 (0;1)

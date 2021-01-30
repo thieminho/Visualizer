@@ -235,7 +235,18 @@ class Plugin:
                                                            num_of_echelons=float(attenuation_params[1]))
                 metrics = params[4].split(';')
                 metrics = metrics[:-1]
-                print(metrics)
+                #def __init__(self, name, metric_type, include=True, invert=False, weight=1.0):
+                metrics_list = [MetricConfig('proximity_correlation_binary',
+                                             metric_type='binary',
+                                             weight=float(metric[0]),
+                                             invert=bool(metric[1]),
+                                             include=bool(metric[2])) for metric in metrics]
+                self.config = Configuration(FilterConfig(node_filter=node_filter,
+                                            edge_filter=edge_filter,
+                                            concurrency_filter=concurrency_filter),
+                                            metric_configs=metrics_list,
+                                            attenuation=attenuation_filter,
+                                            maximal_distance=int(attenuation_params[2]))
         except IOError:
             print('File don\'t exists')
         if os.path.isfile('Parameters/param_file_fm.txt'):
